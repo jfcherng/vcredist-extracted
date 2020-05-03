@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v3" manifestVersion="1.0" description="Fix for KB3118401" displayName="default" company="Microsoft Corporation" copyright="Microsoft Corporation" supportInformation="http://support.microsoft.com/?kbid=3118401" creationTimeStamp="2015-11-20T09:00:14Z" lastUpdateTimeStamp="2015-11-20T09:00:14Z">
+  <assemblyIdentity name="Package_for_KB3118401_RTM_GM" version="6.3.1.0" language="neutral" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" />
+  <package identifier="KB3118401" applicabilityEvaluation="deep" releaseType="Update" restart="possible">
+    <parent buildCompare="GE" revisionCompare="GE" integrate="separate" disposition="detect">
+      <assemblyIdentity name="Package_for_KB2919355" version="6.3.1.14" language="neutral" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" />
+    </parent>
+    <installerAssembly name="Microsoft-Windows-ServicingStack" version="6.0.0.0" language="neutral" processorArchitecture="amd64" versionScope="nonSxS" publicKeyToken="31bf3856ad364e35" />
+    <update name="3118401-2_neutral_PACKAGE">
+      <package integrate="hidden">
+        <assemblyIdentity name="Package_1_for_KB3118401" version="6.3.1.0" language="neutral" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" />
+      </package>
+    </update>
+  </package>
+</assembly>

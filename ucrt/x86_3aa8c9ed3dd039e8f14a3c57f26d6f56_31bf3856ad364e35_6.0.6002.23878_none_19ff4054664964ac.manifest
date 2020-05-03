@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v3" manifestVersion="1.0">
+  <assemblyIdentity name="3aa8c9ed3dd039e8f14a3c57f26d6f56" version="6.0.6002.23878" processorArchitecture="x86" language="neutral" buildType="release" publicKeyToken="31bf3856ad364e35" versionScope="nonSxS" />
+  <deployment />
+  <dependency discoverable="false">
+    <dependentAssembly dependencyType="install">
+      <assemblyIdentity name="Microsoft-Windows-UCRT" version="6.0.6002.23878" processorArchitecture="x86" language="neutral" buildType="release" publicKeyToken="31bf3856ad364e35" versionScope="nonSxS" />
+    </dependentAssembly>
+  </dependency>
+  <dependency discoverable="false">
+    <dependentAssembly dependencyType="install">
+      <assemblyIdentity name="Microsoft-Windows-UniversalCRT-APIfwd-Vista" version="6.0.6002.23878" processorArchitecture="x86" language="neutral" buildType="release" publicKeyToken="31bf3856ad364e35" versionScope="nonSxS" />
+    </dependentAssembly>
+  </dependency>
+</assembly>

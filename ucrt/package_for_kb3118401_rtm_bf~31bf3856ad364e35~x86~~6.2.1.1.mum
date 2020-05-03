@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v3" manifestVersion="1.0" description="Fix for KB3118401" displayName="default" company="Microsoft Corporation" copyright="Microsoft Corporation" supportInformation="http://support.microsoft.com/?kbid=3118401" creationTimeStamp="2015-12-15T07:51:54Z" lastUpdateTimeStamp="2015-12-15T07:51:54Z">
+	<assemblyIdentity name="Package_for_KB3118401_RTM_BF" version="6.2.1.1" language="neutral" processorArchitecture="x86" publicKeyToken="31bf3856ad364e35"/>
+	<package identifier="KB3118401_BF" applicabilityEvaluation="deep" releaseType="Update" restart="possible">
+		<parent buildCompare="EQ" serviceCompare="GE" integrate="separate" disposition="detect">
+			<assemblyIdentity name="Microsoft-Windows-Client-Features-Package" version="6.2.9200.16384" processorArchitecture="x86" language="neutral" buildType="release" publicKeyToken="31bf3856ad364e35" versionScope="nonSxS"/>
+			<assemblyIdentity name="Microsoft-Windows-EmbeddedEdition" version="6.2.9200.16384" processorArchitecture="x86" language="neutral" buildType="release" publicKeyToken="31bf3856ad364e35" versionScope="nonSxS"/>
+		</parent>
+		<installerAssembly name="Microsoft-Windows-ServicingStack" version="6.0.0.0" language="neutral" processorArchitecture="x86" versionScope="nonSxS" publicKeyToken="31bf3856ad364e35"/>
+		<update name="3118401-3_neutral_PACKAGE">
+			<package integrate="hidden">
+				<assemblyIdentity name="Package_1_for_KB3118401_BF" version="6.2.1.1" language="neutral" processorArchitecture="x86" publicKeyToken="31bf3856ad364e35"/>
+			</package>
+		</update>
+		<update name="3118401-4_neutral_PACKAGE">
+			<package integrate="hidden">
+				<assemblyIdentity name="Package_2_for_KB3118401_BF" version="6.2.1.1" language="neutral" processorArchitecture="x86" publicKeyToken="31bf3856ad364e35"/>
+			</package>
+		</update>
+	</package>
+</assembly>

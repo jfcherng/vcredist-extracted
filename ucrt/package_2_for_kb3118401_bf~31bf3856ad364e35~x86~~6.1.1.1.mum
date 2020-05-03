@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v3" manifestVersion="1.0" description="Fix for KB3118401" displayName="default" company="Microsoft Corporation" copyright="Microsoft Corporation" supportInformation="http://support.microsoft.com/?kbid=3118401" creationTimeStamp="2015-12-12T18:00:50Z" lastUpdateTimeStamp="2015-12-12T18:00:50Z">
+	<assemblyIdentity name="Package_2_for_KB3118401_BF" version="6.1.1.1" language="neutral" processorArchitecture="x86" publicKeyToken="31bf3856ad364e35"/>
+	<package identifier="KB3118401_BF" releaseType="Update" restart="possible">
+		<parent buildCompare="EQ" serviceCompare="GE" integrate="separate" disposition="detect">
+			<assemblyIdentity name="Microsoft-Windows-EmbeddedCore-Package" version="6.1.7601.17514" processorArchitecture="x86" language="neutral" buildType="release" publicKeyToken="31bf3856ad364e35" versionScope="nonSxS"/>
+		</parent>
+		<installerAssembly name="Microsoft-Windows-ServicingStack" version="6.0.0.0" language="neutral" processorArchitecture="x86" versionScope="nonSxS" publicKeyToken="31bf3856ad364e35"/>
+		<update name="3118401-2_neutral_LDR">
+			<applicable disposition="staged">
+				<updateComponent elevate="install">
+					<assemblyIdentity name="Microsoft-Windows-UCRT" version="6.1.7601.23303" processorArchitecture="x86" language="neutral" buildType="release" publicKeyToken="31bf3856ad364e35" versionScope="nonSxS"/>
+					<assemblyIdentity name="Microsoft-Windows-UniversalCRT-APIfwd-Win7" version="6.1.7601.23303" processorArchitecture="x86" language="neutral" buildType="release" publicKeyToken="31bf3856ad364e35" versionScope="nonSxS"/>
+				</updateComponent>
+			</applicable>
+			<component>
+				<assemblyIdentity name="552fd3ec5cbd7489d06f1f6b1962cb5b" version="6.1.7601.23303" processorArchitecture="x86" language="neutral" buildType="release" publicKeyToken="31bf3856ad364e35" versionScope="nonSxS"/>
+			</component>
+		</update>
+	</package>
+</assembly>

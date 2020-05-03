@@ -1,0 +1,4 @@
+﻿<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		xmlns="ActionsPane3"
+		targetNamespace="ActionsPane3">
+</xsd:schema>
