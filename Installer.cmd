@@ -1,7 +1,7 @@
 @setlocal DisableDelayedExpansion
 @echo off
 set _debug=0
-set vci=v0.39.0
+set vci=v0.40.0
 set auto=0
 set verbosity=/quiet
 set verbosityshort=/qn /norestart
@@ -41,10 +41,21 @@ if /i %PROCESSOR_ARCHITECTURE%==x86 (
 if "%PROCESSOR_ARCHITEW6432%"=="" (set arch=x86&set sxs=x86)
 )
 
+set xp=0
 ver|findstr /c:" 5." >nul
-if %errorlevel% equ 0 (set xp=1) else (set xp=0)
+if %errorlevel% equ 0 (
+if %auto% equ 1 goto :eof
+echo ==== Notice ====
+echo VC++ AIO v35 is the last version to support Windows XP
+echo VC++ 2019 v14.28.29213.0 is the last version compatible with Windows XP
+echo.
+if %_debug% equ 1 goto :eof
+echo Press any key to exit...
+pause >nul
+goto :eof
+)
 
-if %_debug% equ 0 if %xp% equ 0 reg query "HKU\S-1-5-19" 1>nul 2>nul || (
+if %_debug% equ 0 reg query "HKU\S-1-5-19" 1>nul 2>nul || (
 echo ==== ERROR ====
 echo This script require administrator privileges.
 echo To do so, right click on this script and select 'Run as administrator'
@@ -79,10 +90,6 @@ echo The window will be closed when finished
 :Begin
 title Visual C++ Redistributable AIO %vci%
 
-if %xp% equ 1 (
-if %auto% equ 1 (goto :proceed) else (goto :top)
-)
-
 for /f "tokens=6 delims=[]. " %%G in ('ver') do set winbuild=%%G
 
 for /f "skip=2 tokens=3* delims= " %%G in ('"reg query "hklm\software\microsoft\Windows NT\currentversion" /v productname" %_Nul6%') do set "winv=%%G %%H"
@@ -110,16 +117,10 @@ echo.
 echo Proceed with the check/removal and installation?
 echo.
 echo ----------------------------------------------------------
-if %xp% equ 0 (
 choice /c YRN /n /m "Press Y for Yes, R for ReadMe, or N to cancel and exit> "
 if errorlevel 3 goto :eof
 if errorlevel 2 goto :readme
 if errorlevel 1 goto :proceed
-)
-set /p _inp="Enter Y for Yes, R for ReadMe, or N to cancel and exit> "
-if /i "%_inp%"=="n" goto :eof
-if /i "%_inp%"=="r" goto :readme
-if /i "%_inp%"=="y" goto :proceed
 goto :top
 
 :proceed
@@ -134,7 +135,7 @@ set "_version09=307297523"
 set "_version10=40219473"
 set "_version11=61135400"
 set "_version12=406640"
-set "_version14=28295151"
+set "_version14=28296170"
 set "_vervstor=608280"
 set "_filevstor=%CommonProgramFiles%\Microsoft Shared\VSTO\vstoee.dll"
 
@@ -152,13 +153,6 @@ set "_x64file11=mfcm110.dll"
 set "_x64file12=mfcm120.dll"
 set "_x64file14=mfcm140.dll"
 
-if %xp% equ 1 (
-set "_x86file08=%SystemRoot%\WinSxS\x86_microsoft.vc80.mfc_1fc8b3b9a1e18e3b_8.0.50727.6229_x-ww_1583ac57\mfcm80.dll"
-set "_x86file09=%SystemRoot%\WinSxS\x86_microsoft.vc90.mfc_1fc8b3b9a1e18e3b_9.0.30729.7523_x-ww_3306cf11\mfcm90.dll"
-set "_x64file08=%SystemRoot%\WinSxS\amd64_microsoft.vc80.mfc_1fc8b3b9a1e18e3b_8.0.50727.6229_x-ww_478d9237\mfcm80.dll"
-set "_x64file09=%SystemRoot%\WinSxS\amd64_microsoft.vc90.mfc_1fc8b3b9a1e18e3b_9.0.30729.7523_x-ww_6510b4f1\mfcm90.dll"
-)
-
 set "_x86code08={710f4c1c-cc18-4c49-8cbf-51240c89a1a2}"
 set "_x86code09={9BE518E6-ECC6-35A9-88E4-87755C07200F}"
 set "_x86code10={F0C3E5D1-1ADE-321E-8167-68EF0DE699A5}"
@@ -167,8 +161,8 @@ set "_x86code11m={BD95A8CD-1D9F-35AD-981A-3E7925026EBB}"
 set "_x86code11a={B175520C-86A2-35A7-8619-86DC379688B9}"
 set "_x86code12m={8122DAB1-ED4D-3676-BB0A-CA368196543E}"
 set "_x86code12a={D401961D-3A20-3AC7-943B-6139D5BD490A}"
-set "_x86code14m={CAA58D4B-E030-422E-8012-904C3371E68F}"
-set "_x86code14a={FBF00404-5D88-4198-AC62-982857C1F1BC}"
+set "_x86code14m={45AE5805-550F-4D48-A10C-A30AEAA67E7F}"
+set "_x86code14a={2AB55CA8-9227-4853-B663-3EBB4E664553}"
 
 set "_x64code08={ad8a2fa1-06e7-4b0d-927d-6e54b3d31028}"
 set "_x64code09={5FCE6D76-F5DC-37AB-B2B8-22AB8CEDB1D4}"
@@ -178,8 +172,8 @@ set "_x64code11m={CF2BEA3C-26EA-32F8-AA9B-331F7E34BA97}"
 set "_x64code11a={37B8F9C7-03FB-3253-8781-2517C99D7C00}"
 set "_x64code12m={53CF6934-A98D-3D84-9146-FC4EDF3D5641}"
 set "_x64code12a={010792BA-551A-3AC0-A7EF-0FAB4156C382}"
-set "_x64code14m={30D59B1D-01B4-41CC-9BF0-AB62B6AA730B}"
-set "_x64code14a={3032E71F-B45F-4ECF-8A06-D4146B6BF00F}"
+set "_x64code14m={682FC462-BA23-41F6-9141-BED5E81E35C7}"
+set "_x64code14a={0CC72BE4-AFF5-4F53-A0F6-BA2BCE66E1E0}"
 
 if exist "!_temp!\msi.txt" del /f /q "!_temp!\msi.txt"
 if exist "!_temp!\wix.txt" del /f /q "!_temp!\wix.txt"
@@ -192,10 +186,7 @@ set "RegKey=SOFTWARE\Microsoft\Windows Script Host\Settings"
 reg query "HKCU\%RegKey%" /v Enabled %_Nul2% | find /i "0x0" %_Nul1% && (set vbscu=1&reg delete "HKCU\%RegKey%" /v Enabled /f %_Nul3%)
 reg query "HKLM\%RegKey%" /v Enabled %_Nul2% | find /i "0x0" %_Nul1% && (set vbslm=1&reg delete "HKLM\%RegKey%" /v Enabled /f %_Nul3%)
 
-for /f "tokens=1,2 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\System32\msi.dll"') do set "wiv=%%i%%j"
-
 if %arch% neq x64 goto :x64skip
-if %xp% equ 1 goto :msi32
 
 call :title
 
@@ -262,8 +253,6 @@ reg query %_wowkey%\!_x86code%%Gm! %_val% %_Nul3% || set _x86install%%G=1
 reg query %_wowkey%\!_x86code%%Ga! %_val% %_Nul3% || set _x86install%%G=1
 ))
 
-if %xp% equ 1 goto :msi
-
 reg query %_wowkey% /f "Microsoft Visual C++ 2005 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v %_x86code08% >>"!_temp!\msi.txt"
 
 reg query %_wowkey% /f "Microsoft Visual C++ 2008 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v %_x86code09% >>"!_temp!\msi.txt"
@@ -309,7 +298,6 @@ call :title
 if exist "!_temp!\msi.txt" del /f /q "!_temp!\msi.txt"
 if exist "!_temp!\wix.txt" del /f /q "!_temp!\wix.txt"
 
-if %xp% equ 1 goto :msi
 if %arch% equ x64 goto :msi
 
 for %%G in (
@@ -376,8 +364,6 @@ if !_%arch%install%%G!==0 (
 reg query %_natkey%\!_%arch%code%%Gm! %_val% %_Nul3% || set _%arch%install%%G=1
 reg query %_natkey%\!_%arch%code%%Ga! %_val% %_Nul3% || set _%arch%install%%G=1
 ))
-
-if %xp% equ 1 goto :process
 
 reg query %_natkey% /f "Microsoft Visual C++ 2005 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v !_%arch%code08! >>"!_temp!\msi.txt"
 
@@ -462,7 +448,6 @@ if %installcount% equ 0 goto :vbc
 for %%G in (08,09,10) do (
 if !_%arch%install%%G!==1 (call :install "!_%arch%msi%%G!")
 )
-if %xp% equ 1 if %wiv% lss 31 goto :wow64
 for %%G in (11,12,14) do (
 if !_%arch%install%%G!==1 (call :install "!_%arch%msi%%Gm!"&call :install "!_%arch%msi%%Ga!")
 )
@@ -473,7 +458,6 @@ if %arch% neq x64 goto :vbc
 for %%G in (08,09,10) do (
 if !_x86install%%G!==1 (call :install "!_x86msi%%G!")
 )
-if %xp% equ 1 if %wiv% lss 31 goto :vbc
 for %%G in (11,12,14) do (
 if !_x86install%%G!==1 (call :install "!_x86msi%%Gm!"&call :install "!_x86msi%%Ga!")
 )
@@ -506,7 +490,7 @@ msadodc.ocx   msdatrep.ocx  msrdo20.dll
 if exist "%dest%\%%G" set "vbfiles=!vbfiles! %dest%\%%G"
 )
 if %_debug% equ 0 (%_Nul3% regsvr32 /u /s !vbfiles!) else (echo %vbfiles%)
-if %_debug% equ 0 if %xp% equ 0 if exist "%dest%\msvbvm50.dll" (
+if %_debug% equ 0 if exist "%dest%\msvbvm50.dll" (
 regsvr32 /u /s %dest%\msvbvm50.dll %_Nul3%
 reg add HKLM\SYSTEM\CurrentControlSet\Services\EventLog\Application\VBRuntime /v EventMessageFile /t REG_SZ /d %dest%\msvbvm60.dll /f %_Nul3%
 reg add HKLM\SYSTEM\CurrentControlSet\Services\EventLog\Application\VBRuntime /v TypesSupported /t REG_DWORD /d 4 /f %_Nul3%
@@ -528,7 +512,7 @@ if exist "%dest%\%%~nxG" (
   if %_debug% equ 0 (del /f /q "%dest%\%%~nxG" %_Nul3%)
   )
 )
-if %_debug% equ 0 if %xp% equ 0 if exist "%dest%\msvbvm50.dll" del /f /q %dest%\msvbvm50.dll %_Nul3%
+if %_debug% equ 0 if exist "%dest%\msvbvm50.dll" del /f /q %dest%\msvbvm50.dll %_Nul3%
 if %_debug% equ 0 if %arch% neq x64 (
 del /f /q %SystemRoot%\System\vb40016.dll %_Nul3%
 del /f /q %SystemRoot%\System\vbrun*.dll %_Nul3%
@@ -545,7 +529,6 @@ if %_debug% equ 0 %_vbcrun% %verbosityshort%
 
 :ucrtbase
 if %installcount% equ 0 if %invalid% equ 0 (call :title&echo All installed Visual C++ Redistributables are compliant.)
-if %xp% equ 1 goto :close
 if defined ucrt goto :close
 if exist "%SysPath%\ucrtbase.dll" goto :close
 if %_debug% equ 1 goto :close
@@ -605,7 +588,7 @@ if %_debug% equ 1 goto :eof
 echo -----------------------------------------
 echo Installer for Visual C++ Runtimes %vci%
 echo -----------------------------------------
-if %xp% equ 0 echo %_os%
+echo %_os%
 echo.
 goto :eof
 
@@ -631,14 +614,9 @@ echo Before installation, the script needs to check and remove
 echo existing non-compliant Visual C++ Runtimes.
 echo.
 echo ----------------------------------------------------------
-if %xp% equ 0 (
 choice /c NM /N /M "N - Next page, M - Return to Installer"
 if errorlevel 2 goto :top
 if errorlevel 1 goto :page2
-)
-set /p _inp="Enter: N - Next page, M - Return to Installer> "
-if /i "%_inp%"=="m" goto :top
-if /i "%_inp%"=="n" goto :page2
 goto :readme
 
 :page2
@@ -656,19 +634,14 @@ echo original installation script
 echo.
 echo Latest AIO Repack release can be found at:
 echo https://tiny.cc/vcredist
+echo https://github.com/abbodi1406/vcredist/releases
 echo.
 echo.
 echo Visual Studio is a registered trademark of Microsoft Corporation.
 echo.
 echo ---------------------------------------------------------------
-if %xp% equ 0 (
-choice /c PLM /N /M "P - Previous Page, L - Open above link, M - Return to Installer"
+choice /c PLM /N /M "P - Previous Page, L - Open release link, M - Return to Installer"
 if errorlevel 3 goto :top
 if errorlevel 2 start https://tiny.cc/vcredist&goto :page2
 if errorlevel 1 goto :readme
-)
-set /p _inp="Enter: P - Previous Page, L - Open above link, M - Return to Installer> "
-if /i "%_inp%"=="m" goto :top
-if /i "%_inp%"=="l" start https://tiny.cc/vcredist&goto :page2
-if /i "%_inp%"=="p" goto :readme
 goto :page2
