@@ -1,7 +1,7 @@
 @setlocal DisableDelayedExpansion
 @echo off
 set _debug=0
-set vci=v0.41.0
+set vci=v0.43.0
 set auto=0
 set verbosity=/quiet
 set verbosityshort=/qn /norestart
@@ -46,7 +46,7 @@ ver|findstr /c:" 5." >nul
 if %errorlevel% equ 0 (
 if %auto% equ 1 goto :eof
 echo ==== Notice ====
-echo VC++ AIO v35 is the last version to support Windows XP
+echo VisualCppRedist_AIO v35 is the last version to support Windows XP
 echo VC++ 2019 v14.28.29213.0 is the last version compatible with Windows XP
 echo.
 if %_debug% equ 1 goto :eof
@@ -135,7 +135,7 @@ set "_version09=307297523"
 set "_version10=40219473"
 set "_version11=61135400"
 set "_version12=406640"
-set "_version14=28297151"
+set "_version14=28298120"
 set "_vervstor=608280"
 set "_filevstor=%CommonProgramFiles%\Microsoft Shared\VSTO\vstoee.dll"
 
@@ -161,8 +161,8 @@ set "_x86code11m={BD95A8CD-1D9F-35AD-981A-3E7925026EBB}"
 set "_x86code11a={B175520C-86A2-35A7-8619-86DC379688B9}"
 set "_x86code12m={8122DAB1-ED4D-3676-BB0A-CA368196543E}"
 set "_x86code12a={D401961D-3A20-3AC7-943B-6139D5BD490A}"
-set "_x86code14m={1350A46D-514D-4872-907C-D7E635141EFD}"
-set "_x86code14a={72092D54-764E-40E8-9EEE-95004D7A23CD}"
+set "_x86code14m={7C22F93B-954D-4C5C-BB17-E82779DFB215}"
+set "_x86code14a={1A170C53-DE36-4D51-A177-FE43B30E304B}"
 
 set "_x64code08={ad8a2fa1-06e7-4b0d-927d-6e54b3d31028}"
 set "_x64code09={5FCE6D76-F5DC-37AB-B2B8-22AB8CEDB1D4}"
@@ -172,8 +172,8 @@ set "_x64code11m={CF2BEA3C-26EA-32F8-AA9B-331F7E34BA97}"
 set "_x64code11a={37B8F9C7-03FB-3253-8781-2517C99D7C00}"
 set "_x64code12m={53CF6934-A98D-3D84-9146-FC4EDF3D5641}"
 set "_x64code12a={010792BA-551A-3AC0-A7EF-0FAB4156C382}"
-set "_x64code14m={F26433CF-A51A-4B53-84F0-50AB6B535BBA}"
-set "_x64code14a={D84C3616-2BBA-41AA-B172-5D4497727404}"
+set "_x64code14m={FA2ED2D5-7D44-4A99-B5C0-62036EFED9FC}"
+set "_x64code14a={10F7D571-C8CA-4C88-9805-810750C69C9A}"
 
 if exist "!_temp!\msi.txt" del /f /q "!_temp!\msi.txt"
 if exist "!_temp!\wix.txt" del /f /q "!_temp!\wix.txt"
