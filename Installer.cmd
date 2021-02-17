@@ -1,7 +1,7 @@
 @setlocal DisableDelayedExpansion
 @echo off
 set _debug=0
-set vci=v0.43.0
+set vci=v0.44.0
 set auto=0
 set verbosity=/quiet
 set verbosityshort=/qn /norestart
@@ -36,10 +36,10 @@ set "Path=%SysPath%;%SystemRoot%;%SysPath%\Wbem"
 set "_temp=%temp%"
 for /f "tokens=2*" %%a in ('reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop') do call set "_log=%%b\VCpp"
 
-set arch=x64&set sxs=amd64
-if /i %PROCESSOR_ARCHITECTURE%==x86 (
-if "%PROCESSOR_ARCHITEW6432%"=="" (set arch=x86&set sxs=x86)
-)
+set "arch=x64"&set "xBT=amd64"
+if /i "%PROCESSOR_ARCHITECTURE%"=="x86" if "%PROCESSOR_ARCHITEW6432%"=="" set "arch=x86"&set "xBT=x86"
+:: if /i "%PROCESSOR_ARCHITECTURE%"=="arm64" set "arch=x86"&set "xBT=x86"
+:: if /i "%PROCESSOR_ARCHITEW6432%"=="arm64" set "arch=x86"&set "xBT=x86"
 
 set xp=0
 ver|findstr /c:" 5." >nul
@@ -135,7 +135,7 @@ set "_version09=307297523"
 set "_version10=40219473"
 set "_version11=61135400"
 set "_version12=406640"
-set "_version14=28298120"
+set "_version14=28299100"
 set "_vervstor=608280"
 set "_filevstor=%CommonProgramFiles%\Microsoft Shared\VSTO\vstoee.dll"
 
@@ -161,8 +161,8 @@ set "_x86code11m={BD95A8CD-1D9F-35AD-981A-3E7925026EBB}"
 set "_x86code11a={B175520C-86A2-35A7-8619-86DC379688B9}"
 set "_x86code12m={8122DAB1-ED4D-3676-BB0A-CA368196543E}"
 set "_x86code12a={D401961D-3A20-3AC7-943B-6139D5BD490A}"
-set "_x86code14m={7C22F93B-954D-4C5C-BB17-E82779DFB215}"
-set "_x86code14a={1A170C53-DE36-4D51-A177-FE43B30E304B}"
+set "_x86code14m={1110E034-017D-48D8-83B9-AF2A2BFDD385}"
+set "_x86code14a={6D7D03AB-CC57-4350-9451-EF33BF17FBB4}"
 
 set "_x64code08={ad8a2fa1-06e7-4b0d-927d-6e54b3d31028}"
 set "_x64code09={5FCE6D76-F5DC-37AB-B2B8-22AB8CEDB1D4}"
@@ -172,8 +172,8 @@ set "_x64code11m={CF2BEA3C-26EA-32F8-AA9B-331F7E34BA97}"
 set "_x64code11a={37B8F9C7-03FB-3253-8781-2517C99D7C00}"
 set "_x64code12m={53CF6934-A98D-3D84-9146-FC4EDF3D5641}"
 set "_x64code12a={010792BA-551A-3AC0-A7EF-0FAB4156C382}"
-set "_x64code14m={FA2ED2D5-7D44-4A99-B5C0-62036EFED9FC}"
-set "_x64code14a={10F7D571-C8CA-4C88-9805-810750C69C9A}"
+set "_x64code14m={DE015560-04E3-4915-8F99-5B29289E3998}"
+set "_x64code14a={06F1FCFD-8F77-488A-A477-6CA8A783EDD7}"
 
 if exist "!_temp!\msi.txt" del /f /q "!_temp!\msi.txt"
 if exist "!_temp!\wix.txt" del /f /q "!_temp!\wix.txt"
@@ -357,7 +357,7 @@ if !_%arch%install%%G!==0 reg query %_natkey%\!_%arch%code%%G! %_val% %_Nul3% ||
 )
 if !_%arch%install10!==0 (
 reg query %_natkey%\!_%arch%code10! %_val% %_Nul3% || set _%arch%install10=1
-reg query HKLM\SOFTWARE\Classes\Installer\Features\!_%arch%code10c! /v "VC_RED_enu_%sxs%_net_SETUP" %_Nul3% && set _%arch%install10=1
+reg query HKLM\SOFTWARE\Classes\Installer\Features\!_%arch%code10c! /v "VC_RED_enu_%xBT%_net_SETUP" %_Nul3% && set _%arch%install10=1
 )
 for %%G in (11,12,14) do (
 if !_%arch%install%%G!==0 (
