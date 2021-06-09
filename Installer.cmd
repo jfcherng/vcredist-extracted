@@ -1,7 +1,7 @@
 @setlocal DisableDelayedExpansion
 @echo off
 set _debug=0
-set vci=v0.49.0
+set vci=v0.50.0
 set auto=0
 set verbosity=/quiet
 set verbosityshort=/qn /norestart
@@ -22,6 +22,10 @@ set auto=1
 if /i "%~1"=="/vcpp" (
 set auto=1
 set vcpp=1
+)
+if /i "%~1"=="/uc14" (
+set auto=1
+set uc14=1
 )
 if /i "%~1"=="/debug" (
 set _debug=1
@@ -93,6 +97,7 @@ echo The window will be closed when finished
 @exit /b
 
 :Begin
+if defined uc14 goto :ucrtonly
 title Visual C++ Redistributable AIO %vci%
 
 for /f "tokens=6 delims=[]. " %%G in ('ver') do set winbuild=%%G
@@ -142,7 +147,7 @@ set "_ver09=307297523"
 set "_ver10=40219473"
 set "_ver11=61135400"
 set "_ver12=406640"
-set "_ver14=29301293"
+set "_ver14=29301302"
 
 set "_filevstor=%CommonProgramFiles%\Microsoft Shared\VSTO\vstoee.dll"
 
@@ -168,8 +173,8 @@ set "_x86code11m={BD95A8CD-1D9F-35AD-981A-3E7925026EBB}"
 set "_x86code11a={B175520C-86A2-35A7-8619-86DC379688B9}"
 set "_x86code12m={8122DAB1-ED4D-3676-BB0A-CA368196543E}"
 set "_x86code12a={D401961D-3A20-3AC7-943B-6139D5BD490A}"
-set "_x86code14m={664F72A5-21E2-427A-B78D-3BDE9A877E5B}"
-set "_x86code14a={8F31BD8A-96F6-4576-8282-C6F1886F9F8E}"
+set "_x86code14m={B5E417DC-EB8F-4EBE-814A-54E0E0F22E86}"
+set "_x86code14a={65903554-0A65-4376-BCC0-63484BA17339}"
 
 set "_x64code08={ad8a2fa1-06e7-4b0d-927d-6e54b3d31028}"
 set "_x64code09={5FCE6D76-F5DC-37AB-B2B8-22AB8CEDB1D4}"
@@ -179,8 +184,8 @@ set "_x64code11m={CF2BEA3C-26EA-32F8-AA9B-331F7E34BA97}"
 set "_x64code11a={37B8F9C7-03FB-3253-8781-2517C99D7C00}"
 set "_x64code12m={53CF6934-A98D-3D84-9146-FC4EDF3D5641}"
 set "_x64code12a={010792BA-551A-3AC0-A7EF-0FAB4156C382}"
-set "_x64code14m={7397283E-6C2F-410C-A003-C8E5E6B41D6B}"
-set "_x64code14a={5E05D42B-B363-4435-B428-D615047EDA54}"
+set "_x64code14m={ED7828EB-80D2-4343-9E64-0115FEE8E209}"
+set "_x64code14a={D121438D-80C5-443F-B982-8E89F5C0D770}"
 
 if exist "!_temp!\msi.txt" del /f /q "!_temp!\msi.txt"
 if exist "!_temp!\wix.txt" del /f /q "!_temp!\wix.txt"
@@ -556,6 +561,7 @@ if %_debug% equ 0 %_vbcrun% %verbosityshort%
 :ucrtbase
 if %installcount% equ 0 if %invalid% equ 0 (call :title&echo All installed Visual C++ Redistributables are compliant.)
 if defined ucrt goto :close
+:ucrtonly
 if exist "%SysPath%\ucrtbase.dll" goto :close
 if %_debug% equ 1 goto :close
 set "dest=%SystemRoot%\servicing\Packages"
