@@ -1,7 +1,7 @@
 @setlocal DisableDelayedExpansion
 @echo off
 set _debug=0
-set vci=v0.50.0
+set vci=v0.51.0
 set auto=0
 set verbosity=/quiet
 set verbosityshort=/qn /norestart
@@ -173,8 +173,8 @@ set "_x86code11m={BD95A8CD-1D9F-35AD-981A-3E7925026EBB}"
 set "_x86code11a={B175520C-86A2-35A7-8619-86DC379688B9}"
 set "_x86code12m={8122DAB1-ED4D-3676-BB0A-CA368196543E}"
 set "_x86code12a={D401961D-3A20-3AC7-943B-6139D5BD490A}"
-set "_x86code14m={B5E417DC-EB8F-4EBE-814A-54E0E0F22E86}"
-set "_x86code14a={65903554-0A65-4376-BCC0-63484BA17339}"
+set "_x86code14m={F51C74CC-1F7C-4746-821A-C6A599B23337}"
+set "_x86code14a={7756B4D5-BB42-42CC-9219-0102CFEBD794}"
 
 set "_x64code08={ad8a2fa1-06e7-4b0d-927d-6e54b3d31028}"
 set "_x64code09={5FCE6D76-F5DC-37AB-B2B8-22AB8CEDB1D4}"
@@ -184,8 +184,8 @@ set "_x64code11m={CF2BEA3C-26EA-32F8-AA9B-331F7E34BA97}"
 set "_x64code11a={37B8F9C7-03FB-3253-8781-2517C99D7C00}"
 set "_x64code12m={53CF6934-A98D-3D84-9146-FC4EDF3D5641}"
 set "_x64code12a={010792BA-551A-3AC0-A7EF-0FAB4156C382}"
-set "_x64code14m={ED7828EB-80D2-4343-9E64-0115FEE8E209}"
-set "_x64code14a={D121438D-80C5-443F-B982-8E89F5C0D770}"
+set "_x64code14m={4325E9E9-CFAD-4512-8A2D-A60043F76F15}"
+set "_x64code14a={27772063-4301-48AA-8AE6-361D1097B25A}"
 
 if exist "!_temp!\msi.txt" del /f /q "!_temp!\msi.txt"
 if exist "!_temp!\wix.txt" del /f /q "!_temp!\wix.txt"
@@ -216,7 +216,9 @@ for %%G in (
 "%mvc% 2017 RC Redistributable"
 "%mvc% 2017 Redistributable"
 "%mvc% 2019 Redistributable"
+"%mvc% 2022 Redistributable"
 "%mvc% 2015-2019 Redistributable"
+"%mvc% 2015-2022 Redistributable"
 ) do (
 reg query %_wowkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\wix.txt"
 )
@@ -288,8 +290,8 @@ reg query %_wowkey% /f "%mvc% 2012 x86 Minimum Runtime" /s %_Nul2% | find /i "HK
 reg query %_wowkey% /f "%mvc% 2013 x86 Additional Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v %_x86code12a% >>"!_temp!\msi.txt"
 reg query %_wowkey% /f "%mvc% 2013 x86 Minimum Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v %_x86code12m% >>"!_temp!\msi.txt"
 
-reg query %_wowkey% /f "%mvc% 2019 x86 Additional Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v %_x86code14a% >>"!_temp!\msi.txt"
-reg query %_wowkey% /f "%mvc% 2019 x86 Minimum Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v %_x86code14m% >>"!_temp!\msi.txt"
+reg query %_wowkey% /f "%mvc% 2022 x86 Additional Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v %_x86code14a% >>"!_temp!\msi.txt"
+reg query %_wowkey% /f "%mvc% 2022 x86 Minimum Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v %_x86code14m% >>"!_temp!\msi.txt"
 for %%G in (
 "%mvc% 14 x86 Additional Runtime"
 "%mvc% 14 x86 Minimum Runtime"
@@ -297,6 +299,8 @@ for %%G in (
 "%mvc% 2015 x86 Minimum Runtime"
 "%mvc% 2017 x86 Additional Runtime"
 "%mvc% 2017 x86 Minimum Runtime"
+"%mvc% 2019 x86 Additional Runtime"
+"%mvc% 2019 x86 Minimum Runtime"
 ) do (
 reg query %_wowkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi.txt"
 )
@@ -335,7 +339,9 @@ for %%G in (
 "%mvc% 2017 RC Redistributable"
 "%mvc% 2017 Redistributable"
 "%mvc% 2019 Redistributable"
+"%mvc% 2022 Redistributable"
 "%mvc% 2015-2019 Redistributable"
+"%mvc% 2015-2022 Redistributable"
 ) do (
 reg query %_natkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\wix.txt"
 )
@@ -413,8 +419,8 @@ reg query %_natkey% /f "%mvc% 2012 %arch% Minimum Runtime" /s %_Nul2% | find /i 
 reg query %_natkey% /f "%mvc% 2013 %arch% Additional Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v !_%arch%code12a! >>"!_temp!\msi.txt"
 reg query %_natkey% /f "%mvc% 2013 %arch% Minimum Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v !_%arch%code12m! >>"!_temp!\msi.txt"
 
-reg query %_natkey% /f "%mvc% 2019 %arch% Additional Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v !_%arch%code14a! >>"!_temp!\msi.txt"
-reg query %_natkey% /f "%mvc% 2019 %arch% Minimum Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v !_%arch%code14m! >>"!_temp!\msi.txt"
+reg query %_natkey% /f "%mvc% 2022 %arch% Additional Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v !_%arch%code14a! >>"!_temp!\msi.txt"
+reg query %_natkey% /f "%mvc% 2022 %arch% Minimum Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v !_%arch%code14m! >>"!_temp!\msi.txt"
 for %%G in (
 "%mvc% 14 %arch% Additional Runtime"
 "%mvc% 14 %arch% Minimum Runtime"
@@ -422,6 +428,8 @@ for %%G in (
 "%mvc% 2015 %arch% Minimum Runtime"
 "%mvc% 2017 %arch% Additional Runtime"
 "%mvc% 2017 %arch% Minimum Runtime"
+"%mvc% 2019 %arch% Additional Runtime"
+"%mvc% 2019 %arch% Minimum Runtime"
 ) do (
 reg query %_natkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi.txt"
 )
@@ -454,10 +462,10 @@ set "_x86msi12m=2013\x86\vc_runtimeMinimum_x86.msi"
 set "_x86msi12a=2013\x86\vc_runtimeAdditional_x86.msi"
 set "_x64msi12m=2013\x64\vc_runtimeMinimum_x64.msi"
 set "_x64msi12a=2013\x64\vc_runtimeAdditional_x64.msi"
-set "_x86msi14m=2019\x86\vc_runtimeMinimum_x86.msi"
-set "_x86msi14a=2019\x86\vc_runtimeAdditional_x86.msi"
-set "_x64msi14m=2019\x64\vc_runtimeMinimum_x64.msi"
-set "_x64msi14a=2019\x64\vc_runtimeAdditional_x64.msi"
+set "_x86msi14m=2022\x86\vc_runtimeMinimum_x86.msi"
+set "_x86msi14a=2022\x86\vc_runtimeAdditional_x86.msi"
+set "_x64msi14m=2022\x64\vc_runtimeMinimum_x64.msi"
+set "_x64msi14a=2022\x64\vc_runtimeAdditional_x64.msi"
 set "_x86vstor=vstor\vstor40_x86.msi"
 set "_x64vstor=vstor\vstor40_x64.msi"
 set "_vbcrun=vbc\vbcrun.msi"
@@ -635,7 +643,7 @@ echo AIO Repack for latest Microsoft Visual C++ Runtimes
 echo without the original setup bloat payload.
 echo.
 echo Automatically installs the latest available Redistributables for:
-echo - Visual C++: 2005, 2008, 2010, 2012, 2013, 2019 ^(2017-2015^)
+echo - Visual C++: 2005, 2008, 2010, 2012, 2013, 2022 ^(2019-2015^)
 echo - Visual Studio 2010 Tools for Office Runtime
 echo.
 echo Additionally, installs these old x86 runtimes:

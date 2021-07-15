@@ -90,7 +90,9 @@ for %%G in (
 "Microsoft Visual C++ 2017 RC Redistributable"
 "Microsoft Visual C++ 2017 Redistributable"
 "Microsoft Visual C++ 2019 Redistributable"
+"Microsoft Visual C++ 2022 Redistributable"
 "Microsoft Visual C++ 2015-2019 Redistributable"
+"Microsoft Visual C++ 2015-2022 Redistributable"
 ) do (
 reg query %_wowkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\wix.txt"
 )
@@ -126,6 +128,8 @@ for %%G in (
 "Microsoft Visual C++ 2017 x86 Minimum Runtime"
 "Microsoft Visual C++ 2019 x86 Additional Runtime"
 "Microsoft Visual C++ 2019 x86 Minimum Runtime"
+"Microsoft Visual C++ 2022 x86 Additional Runtime"
+"Microsoft Visual C++ 2022 x86 Minimum Runtime"
 "Microsoft Visual Studio 2010 Tools for Office Runtime"
 "Microsoft Visual Basic/C++ Runtime"
 ) do (
@@ -161,7 +165,9 @@ for %%G in (
 "Microsoft Visual C++ 2017 RC Redistributable"
 "Microsoft Visual C++ 2017 Redistributable"
 "Microsoft Visual C++ 2019 Redistributable"
+"Microsoft Visual C++ 2022 Redistributable"
 "Microsoft Visual C++ 2015-2019 Redistributable"
+"Microsoft Visual C++ 2015-2022 Redistributable"
 ) do (
 reg query %_natkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\wix.txt"
 )
@@ -196,6 +202,8 @@ for %%G in (
 "Microsoft Visual C++ 2017 %arch% Minimum Runtime"
 "Microsoft Visual C++ 2019 %arch% Additional Runtime"
 "Microsoft Visual C++ 2019 %arch% Minimum Runtime"
+"Microsoft Visual C++ 2022 %arch% Additional Runtime"
+"Microsoft Visual C++ 2022 %arch% Minimum Runtime"
 "Microsoft Visual Studio 2010 Tools for Office Runtime"
 "Microsoft Visual Basic/C++ Runtime"
 ) do (
