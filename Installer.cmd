@@ -1,7 +1,7 @@
 @setlocal DisableDelayedExpansion
 @echo off
 set _debug=0
-set vci=v0.55.0
+set vci=v0.56.0
 set auto=0
 set verbosity=/quiet
 set verbosityshort=/qn /norestart
@@ -26,6 +26,14 @@ set vcpp=1
 if /i "%~1"=="/uc14" (
 set auto=1
 set uc14=1
+)
+if /i "%~1"=="/update" (
+set auto=1
+set updt=1
+)
+if /i "%~1"=="/dupdate" (
+set _debug=1
+set updt=1
 )
 if /i "%~1"=="/debug" (
 set _debug=1
@@ -147,7 +155,7 @@ set "_ver09=307297523"
 set "_ver10=40219473"
 set "_ver11=61135400"
 set "_ver12=406640"
-set "_ver14=31308180"
+set "_ver14=31309190"
 
 set "_filevstor=%CommonProgramFiles%\Microsoft Shared\VSTO\vstoee.dll"
 
@@ -173,8 +181,8 @@ set "_x86code11m={BD95A8CD-1D9F-35AD-981A-3E7925026EBB}"
 set "_x86code11a={B175520C-86A2-35A7-8619-86DC379688B9}"
 set "_x86code12m={8122DAB1-ED4D-3676-BB0A-CA368196543E}"
 set "_x86code12a={D401961D-3A20-3AC7-943B-6139D5BD490A}"
-set "_x86code14m={74E37548-216C-435A-BE80-342047F976F8}"
-set "_x86code14a={AAC77C13-CA64-4C0F-81B3-FC5373C470D4}"
+set "_x86code14m={4CA1C5EC-16E5-4438-9704-A4F6D84068C4}"
+set "_x86code14a={8681860E-E7D2-421A-A09E-7A6890CE62E5}"
 
 set "_x64code08={ad8a2fa1-06e7-4b0d-927d-6e54b3d31028}"
 set "_x64code09={5FCE6D76-F5DC-37AB-B2B8-22AB8CEDB1D4}"
@@ -184,8 +192,8 @@ set "_x64code11m={CF2BEA3C-26EA-32F8-AA9B-331F7E34BA97}"
 set "_x64code11a={37B8F9C7-03FB-3253-8781-2517C99D7C00}"
 set "_x64code12m={53CF6934-A98D-3D84-9146-FC4EDF3D5641}"
 set "_x64code12a={010792BA-551A-3AC0-A7EF-0FAB4156C382}"
-set "_x64code14m={564EEAC2-A114-4FFD-ACBD-7CB80477A95B}"
-set "_x64code14a={235BE642-A24A-47F7-863D-5E1B32CC2320}"
+set "_x64code14m={E749F10C-EFEA-43D3-8404-B477DD92AF03}"
+set "_x64code14a={D55C642A-D7A4-4581-90A2-D74864791E92}"
 
 if exist "!_temp!\msi.txt" del /f /q "!_temp!\msi.txt"
 if exist "!_temp!\wix.txt" del /f /q "!_temp!\wix.txt"
@@ -200,7 +208,7 @@ reg query "HKLM\%RegKey%" /v Enabled %_Nul2% | find /i "0x0" %_Nul1% && (set vbs
 
 if %arch%==x86 goto :WiXNat
 
-:WiX32
+:WiXWow
 call :title
 
 for %%G in (
@@ -223,7 +231,7 @@ for %%G in (
 reg query %_wowkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\wix.txt"
 )
 
-findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\wix.txt" %_Nul3% || goto :Msi32
+findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\wix.txt" %_Nul3% || goto :MsiWow
 
 echo Uninstalling non-compliant Visual C++ WiX packages {x64/x86}
 echo ^(please wait as this process may take a few moments^)
@@ -240,23 +248,28 @@ for %%H in (%wixpkg%) do (
   )
 )
 
-:Msi32
+:MsiWow
 call :title
 
-for %%G in (08,09,10,11,12,14) do set _x86install%%G=1
+if not defined updt for %%G in (08,09,10,11,12,14) do set _x86install%%G=1
+if defined updt for %%G in (08,09,10,11,12,14) do set _x86install%%G=2
 
+if exist "%SystemRoot%\SysWOW64\!_x86file10!" if defined updt set _x86install10=1
 if exist "%SystemRoot%\SysWOW64\!_x86file10!" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\SysWOW64\!_x86file10!"') do (
 if %%i gtr %_ver10:~0,5% set _x86install10=0
 if %%i equ %_ver10:~0,5% if %%j geq %_ver10:~5,3% set _x86install10=0
 )
+if exist "%SystemRoot%\SysWOW64\!_x86file11!" if defined updt set _x86install11=1
 if exist "%SystemRoot%\SysWOW64\!_x86file11!" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\SysWOW64\!_x86file11!"') do (
 if %%i gtr %_ver11:~0,5% set _x86install11=0
 if %%i equ %_ver11:~0,5% if %%j geq %_ver11:~5,3% set _x86install11=0
 )
+if exist "%SystemRoot%\SysWOW64\!_x86file12!" if defined updt set _x86install12=1
 if exist "%SystemRoot%\SysWOW64\!_x86file12!" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\SysWOW64\!_x86file12!"') do (
 if %%i gtr %_ver12:~0,5% set _x86install12=0
 if %%i equ %_ver12:~0,5% if %%j geq %_ver12:~5,1% set _x86install12=0
 )
+if exist "%SystemRoot%\SysWOW64\!_x86file14!" if defined updt set _x86install14=1
 if exist "%SystemRoot%\SysWOW64\!_x86file14!" for /f "tokens=2-4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\SysWOW64\!_x86file14!"') do (
 if %%i gtr %_ver14:~0,2% set _x86install14=0
 if %%i equ %_ver14:~0,2% if %%j gtr %_ver14:~2,5% set _x86install14=0
@@ -370,22 +383,28 @@ for %%G in (08,09,10,11,12,14,vstor) do set _%arch%install%%G=0
 goto :process
 )
 
-for %%G in (08,09,10,11,12,14,vstor) do set _%arch%install%%G=1
+if not defined updt for %%G in (08,09,10,11,12,14,vstor) do set _%arch%install%%G=1
+if defined updt for %%G in (08,09,10,11,12,14,vstor) do set _%arch%install%%G=2
 
+if exist "%_filevstor%" if defined updt set _%arch%installvstor=1
 if exist "%_filevstor%" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%_filevstor%"') do if %%i%%j geq %_vstor% set _%arch%installvstor=0
 
+if exist "%SysPath%\!_%arch%file10!" if defined updt set _%arch%install10=1
 if exist "%SysPath%\!_%arch%file10!" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\System32\!_%arch%file10!"') do (
 if %%i gtr %_ver10:~0,5% set _%arch%install10=0
 if %%i equ %_ver10:~0,5% if %%j geq %_ver10:~5,3% set _%arch%install10=0
 )
+if exist "%SysPath%\!_%arch%file11!" if defined updt set _%arch%install11=1
 if exist "%SysPath%\!_%arch%file11!" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\System32\!_%arch%file11!"') do (
 if %%i gtr %_ver11:~0,5% set _%arch%install11=0
 if %%i equ %_ver11:~0,5% if %%j geq %_ver11:~5,3% set _%arch%install11=0
 )
+if exist "%SysPath%\!_%arch%file12!" if defined updt set _%arch%install12=1
 if exist "%SysPath%\!_%arch%file12!" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\System32\!_%arch%file12!"') do (
 if %%i gtr %_ver12:~0,5% set _%arch%install12=0
 if %%i equ %_ver12:~0,5% if %%j geq %_ver12:~5,1% set _%arch%install12=0
 )
+if exist "%SysPath%\!_%arch%file14!" if defined updt set _%arch%install14=1
 if exist "%SysPath%\!_%arch%file14!" for /f "tokens=2-4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\System32\!_%arch%file14!"') do (
 if %%i gtr %_ver14:~0,2% set _%arch%install14=0
 if %%i equ %_ver14:~0,2% if %%j gtr %_ver14:~2,5% set _%arch%install14=0
@@ -504,6 +523,10 @@ call :install "!_x86msi%%Ga!"
 :vbc
 if defined vcpp (
 if %installcount% equ 0 if %invalid% equ 0 (call :title&echo All installed Visual C++ Redistributables are compliant.)
+goto :close
+)
+if defined updt (
+if %installcount% equ 0 if %invalid% equ 0 (call :title&echo Installed Visual C++ Redistributables are compliant.)
 goto :close
 )
 if %arch%==x86 (
