@@ -11,17 +11,14 @@ set "SysPath=%SystemRoot%\System32"
 if exist "%SystemRoot%\Sysnative\reg.exe" (set "SysPath=%SystemRoot%\Sysnative")
 set "Path=%SysPath%;%SystemRoot%;%SysPath%\Wbem"
 set "_temp=%temp%"
-set xp=0
-set arch=x64
-if /i %PROCESSOR_ARCHITECTURE%==x86 (
-if "%PROCESSOR_ARCHITEW6432%"=="" (set arch=x86)
-)
-ver|findstr /c:" 5." >nul
+
+set _xp=0
+REG QUERY "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v CurrentBuildNumber |FINDSTR 2600 >NUL
 if %errorlevel% equ 0 (
 if %auto% equ 1 goto :eof
-set xp=1
+set _xp=1
 echo ==== Notice ====
-echo Uninstallation script do not support Windows XP.
+echo This script do not support Windows XP x86 {Build 2600}
 echo.
 echo Press any key to exit...
 pause >nul
@@ -36,12 +33,18 @@ echo Press any key to exit...
 pause >nul
 goto :eof
 )
+
+set "arch=x64"
+if /i "%PROCESSOR_ARCHITECTURE%"=="x86" if "%PROCESSOR_ARCHITEW6432%"=="" set "arch=x86"
+set wixpkg=vcredist_x86.exe,vcredist_x64.exe,vc_redist.x86.exe,vc_redist.x64.exe
+
 set "_Nul1=1>nul"
 set "_Nul2=2>nul"
 set "_Nul6=2^>nul"
 set "_Nul3=1>nul 2>nul"
 setlocal EnableDelayedExpansion
 if %auto% equ 1 goto :proceed
+
 echo.
 echo Proceed with the removal of all Visual Basic/C++ Runtimes?
 echo.
@@ -52,6 +55,7 @@ if errorlevel 1 goto :proceed
 
 :proceed
 @cls
+set "mvc=Microsoft Visual C++"
 set "_msikey=hklm\software\classes\installer\dependencies"
 set "_natkey=hklm\software\microsoft\windows\currentversion\uninstall"
 set "_wowkey=hklm\software\wow6432node\microsoft\windows\currentversion\uninstall"
@@ -76,34 +80,36 @@ reg delete "%_msikey%\Microsoft.VS.VC_RuntimeAdditionalVSU_x86,v14\Dependents" /
 reg delete "%_msikey%\Microsoft.VS.VC_RuntimeMinimumVSU_amd64,v14\Dependents" /f %_Nul3%
 reg delete "%_msikey%\Microsoft.VS.VC_RuntimeMinimumVSU_x86,v14\Dependents" /f %_Nul3%
 
-if %arch% neq x64 goto :x64skip
+if %arch%==x86 goto :WiXNat
+
+:WiXWow
 for %%G in (
-"Microsoft Visual C++ 2012 Redistributable"
-"Microsoft Visual C++ 2013 Preview Redistributable"
-"Microsoft Visual C++ 2013 RC Redistributable"
-"Microsoft Visual C++ 2013 Redistributable"
-"Microsoft Visual C++ 14 CTP Redistributable"
-"Microsoft Visual C++ 2015 Preview Redistributable"
-"Microsoft Visual C++ 2015 CTP Redistributable"
-"Microsoft Visual C++ 2015 RC Redistributable"
-"Microsoft Visual C++ 2015 Redistributable"
-"Microsoft Visual C++ 2017 RC Redistributable"
-"Microsoft Visual C++ 2017 Redistributable"
-"Microsoft Visual C++ 2019 Redistributable"
-"Microsoft Visual C++ 2022 Redistributable"
-"Microsoft Visual C++ 2015-2019 Redistributable"
-"Microsoft Visual C++ 2015-2022 Redistributable"
+"%mvc% 2012 Redistributable"
+"%mvc% 2013 Preview Redistributable"
+"%mvc% 2013 RC Redistributable"
+"%mvc% 2013 Redistributable"
+"%mvc% 14 CTP Redistributable"
+"%mvc% 2015 Preview Redistributable"
+"%mvc% 2015 CTP Redistributable"
+"%mvc% 2015 RC Redistributable"
+"%mvc% 2015 Redistributable"
+"%mvc% 2017 RC Redistributable"
+"%mvc% 2017 Redistributable"
+"%mvc% 2019 Redistributable"
+"%mvc% 2022 Redistributable"
+"%mvc% 2015-2019 Redistributable"
+"%mvc% 2015-2022 Redistributable"
 ) do (
 reg query %_wowkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\wix.txt"
 )
 
-findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\wix.txt" %_Nul3% || goto :msi32
+findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\wix.txt" %_Nul3% || goto :MsiWow
 
 echo.
 echo Uninstalling Visual C++ WiX packages {x64/x86}
 
 for /f "usebackq tokens=8 delims=\" %%G in ("!_temp!\wix.txt") do (
-for %%H in (vcredist_x86.exe,vcredist_x64.exe,vc_redist.x86.exe,vc_redist.x64.exe) do (
+for %%H in (%wixpkg%) do (
   if exist "%ProgramData%\Package Cache\%%G\%%H" (
     "%ProgramData%\Package Cache\%%G\%%H" /uninstall %verbosity% /norestart
     reg delete %_wowkey%\%%G /f %_Nul3%
@@ -111,32 +117,32 @@ for %%H in (vcredist_x86.exe,vcredist_x64.exe,vc_redist.x86.exe,vc_redist.x64.ex
   )
 )
 
-:msi32
+:MsiWow
 for %%G in (
-"Microsoft Visual C++ 2005 Redistributable"
-"Microsoft Visual C++ 2008 Redistributable"
-"Microsoft Visual C++ 2010  x86 Redistributable"
-"Microsoft Visual C++ 2012 x86 Additional Runtime"
-"Microsoft Visual C++ 2012 x86 Minimum Runtime"
-"Microsoft Visual C++ 2013 x86 Additional Runtime"
-"Microsoft Visual C++ 2013 x86 Minimum Runtime"
-"Microsoft Visual C++ 14 x86 Additional Runtime"
-"Microsoft Visual C++ 14 x86 Minimum Runtime"
-"Microsoft Visual C++ 2015 x86 Additional Runtime"
-"Microsoft Visual C++ 2015 x86 Minimum Runtime"
-"Microsoft Visual C++ 2017 x86 Additional Runtime"
-"Microsoft Visual C++ 2017 x86 Minimum Runtime"
-"Microsoft Visual C++ 2019 x86 Additional Runtime"
-"Microsoft Visual C++ 2019 x86 Minimum Runtime"
-"Microsoft Visual C++ 2022 x86 Additional Runtime"
-"Microsoft Visual C++ 2022 x86 Minimum Runtime"
+"%mvc% 2005 Redistributable"
+"%mvc% 2008 Redistributable"
+"%mvc% 2010  x86 Redistributable"
+"%mvc% 2012 x86 Additional Runtime"
+"%mvc% 2012 x86 Minimum Runtime"
+"%mvc% 2013 x86 Additional Runtime"
+"%mvc% 2013 x86 Minimum Runtime"
+"%mvc% 14 x86 Additional Runtime"
+"%mvc% 14 x86 Minimum Runtime"
+"%mvc% 2015 x86 Additional Runtime"
+"%mvc% 2015 x86 Minimum Runtime"
+"%mvc% 2017 x86 Additional Runtime"
+"%mvc% 2017 x86 Minimum Runtime"
+"%mvc% 2019 x86 Additional Runtime"
+"%mvc% 2019 x86 Minimum Runtime"
+"%mvc% 2022 x86 Additional Runtime"
+"%mvc% 2022 x86 Minimum Runtime"
 "Microsoft Visual Studio 2010 Tools for Office Runtime"
 "Microsoft Visual Basic/C++ Runtime"
 ) do (
 reg query %_wowkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi.txt"
 )
 
-findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\msi.txt" %_Nul3% || goto :x64skip
+findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\msi.txt" %_Nul3% || goto :WiXNat
 
 echo.
 echo Uninstalling Visual C++ MSI packages {x86}
@@ -146,32 +152,32 @@ start /wait msiexec /X%%G %verbosity% /norestart
 reg delete %_wowkey%\%%G /f %_Nul3%
 )
 
-:x64skip
+:WiXNat
 if exist "!_temp!\msi.txt" del /f /q "!_temp!\msi.txt"
 if exist "!_temp!\wix.txt" del /f /q "!_temp!\wix.txt"
 
-if %arch% equ x64 goto :msi
+if not %arch%==x86 goto :MsiNat
 
 for %%G in (
-"Microsoft Visual C++ 2012 Redistributable"
-"Microsoft Visual C++ 2013 Preview Redistributable"
-"Microsoft Visual C++ 2013 RC Redistributable"
-"Microsoft Visual C++ 2013 Redistributable"
-"Microsoft Visual C++ 14 CTP Redistributable"
-"Microsoft Visual C++ 2015 Preview Redistributable"
-"Microsoft Visual C++ 2015 CTP Redistributable"
-"Microsoft Visual C++ 2015 RC Redistributable"
-"Microsoft Visual C++ 2015 Redistributable"
-"Microsoft Visual C++ 2017 RC Redistributable"
-"Microsoft Visual C++ 2017 Redistributable"
-"Microsoft Visual C++ 2019 Redistributable"
-"Microsoft Visual C++ 2022 Redistributable"
-"Microsoft Visual C++ 2015-2019 Redistributable"
-"Microsoft Visual C++ 2015-2022 Redistributable"
+"%mvc% 2012 Redistributable"
+"%mvc% 2013 Preview Redistributable"
+"%mvc% 2013 RC Redistributable"
+"%mvc% 2013 Redistributable"
+"%mvc% 14 CTP Redistributable"
+"%mvc% 2015 Preview Redistributable"
+"%mvc% 2015 CTP Redistributable"
+"%mvc% 2015 RC Redistributable"
+"%mvc% 2015 Redistributable"
+"%mvc% 2017 RC Redistributable"
+"%mvc% 2017 Redistributable"
+"%mvc% 2019 Redistributable"
+"%mvc% 2022 Redistributable"
+"%mvc% 2015-2019 Redistributable"
+"%mvc% 2015-2022 Redistributable"
 ) do (
 reg query %_natkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\wix.txt"
 )
-findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\wix.txt" %_Nul3% || goto :msi
+findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\wix.txt" %_Nul3% || goto :MsiNat
 
 echo.
 echo Uninstalling Visual C++ WiX packages {x86}
@@ -185,25 +191,25 @@ for %%H in (vcredist_x86.exe,vc_redist.x86.exe) do (
   )
 )
 
-:msi
+:MsiNat
 for %%G in (
-"Microsoft Visual C++ 2005 Redistributable"
-"Microsoft Visual C++ 2008 Redistributable"
-"Microsoft Visual C++ 2010  %arch% Redistributable"
-"Microsoft Visual C++ 2012 %arch% Additional Runtime"
-"Microsoft Visual C++ 2012 %arch% Minimum Runtime"
-"Microsoft Visual C++ 2013 %arch% Additional Runtime"
-"Microsoft Visual C++ 2013 %arch% Minimum Runtime"
-"Microsoft Visual C++ 14 %arch% Additional Runtime"
-"Microsoft Visual C++ 14 %arch% Minimum Runtime"
-"Microsoft Visual C++ 2015 %arch% Additional Runtime"
-"Microsoft Visual C++ 2015 %arch% Minimum Runtime"
-"Microsoft Visual C++ 2017 %arch% Additional Runtime"
-"Microsoft Visual C++ 2017 %arch% Minimum Runtime"
-"Microsoft Visual C++ 2019 %arch% Additional Runtime"
-"Microsoft Visual C++ 2019 %arch% Minimum Runtime"
-"Microsoft Visual C++ 2022 %arch% Additional Runtime"
-"Microsoft Visual C++ 2022 %arch% Minimum Runtime"
+"%mvc% 2005 Redistributable"
+"%mvc% 2008 Redistributable"
+"%mvc% 2010  %arch% Redistributable"
+"%mvc% 2012 %arch% Additional Runtime"
+"%mvc% 2012 %arch% Minimum Runtime"
+"%mvc% 2013 %arch% Additional Runtime"
+"%mvc% 2013 %arch% Minimum Runtime"
+"%mvc% 14 %arch% Additional Runtime"
+"%mvc% 14 %arch% Minimum Runtime"
+"%mvc% 2015 %arch% Additional Runtime"
+"%mvc% 2015 %arch% Minimum Runtime"
+"%mvc% 2017 %arch% Additional Runtime"
+"%mvc% 2017 %arch% Minimum Runtime"
+"%mvc% 2019 %arch% Additional Runtime"
+"%mvc% 2019 %arch% Minimum Runtime"
+"%mvc% 2022 %arch% Additional Runtime"
+"%mvc% 2022 %arch% Minimum Runtime"
 "Microsoft Visual Studio 2010 Tools for Office Runtime"
 "Microsoft Visual Basic/C++ Runtime"
 ) do (
@@ -221,8 +227,8 @@ reg delete %_natkey%\%%G /f %_Nul3%
 )
 
 :vbc
-if %arch% neq x64 (set "dest=%SystemRoot%\system32") else (set "dest=%SystemRoot%\syswow64")
-if %xp% equ 0 if exist "%dest%\msvbvm50.dll" (
+if %arch%==x86 (set "dest=%SystemRoot%\system32") else (set "dest=%SystemRoot%\syswow64")
+if %_xp% equ 0 if exist "%dest%\msvbvm50.dll" (
 regsvr32 /u /s %dest%\msvbvm50.dll %_Nul3%
 reg add HKLM\SYSTEM\CurrentControlSet\Services\EventLog\Application\VBRuntime /v EventMessageFile /t REG_SZ /d %dest%\msvbvm60.dll /f %_Nul3%
 reg add HKLM\SYSTEM\CurrentControlSet\Services\EventLog\Application\VBRuntime /v TypesSupported /t REG_DWORD /d 4 /f %_Nul3%
@@ -257,8 +263,8 @@ msadodc.ocx   msdatrep.ocx  msrdo20.dll   vb40032.dll
 ) do (
 if exist "%dest%\%%~nxG" del /f /q "%dest%\%%~nxG" %_Nul3%
 )
-if %xp% equ 0 if exist "%dest%\msvbvm50.dll" del /f /q %dest%\msvbvm50.dll %_Nul3%
-if %arch% neq x64 (
+if %_xp% equ 0 if exist "%dest%\msvbvm50.dll" del /f /q %dest%\msvbvm50.dll %_Nul3%
+if %arch%==x86 (
 del /f /q %SystemRoot%\System\vb40016.dll %_Nul3%
 del /f /q %SystemRoot%\System\vbrun*.dll %_Nul3%
 )
@@ -266,8 +272,8 @@ del /f /q %SystemRoot%\System\vbrun*.dll %_Nul3%
 :close
 for %%G in (
 "!_temp!\*Redistributable*.*"
-"!_temp!\dd_vcredist*.*"
-"!_temp!\dd_vstor*.*"
+"!_temp!\*vcredist*.*"
+"!_temp!\*vstor*.*"
 "!_temp!\msi*.log"
 "!_temp!\del*.tmp"
 msi.txt wix.txt

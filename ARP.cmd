@@ -9,17 +9,14 @@ set "SysPath=%SystemRoot%\System32"
 if exist "%SystemRoot%\Sysnative\reg.exe" (set "SysPath=%SystemRoot%\Sysnative")
 set "Path=%SysPath%;%SystemRoot%;%SysPath%\Wbem"
 set "_temp=%temp%"
-set xp=0
-set arch=x64
-if /i %PROCESSOR_ARCHITECTURE%==x86 (
-if "%PROCESSOR_ARCHITEW6432%"=="" (set arch=x86)
-)
-ver|findstr /c:" 5." >nul
+
+set _xp=0
+REG QUERY "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v CurrentBuildNumber |FINDSTR 2600 >NUL
 if %errorlevel% equ 0 (
 if %auto% equ 1 goto :eof
-set xp=1
+set _xp=1
 echo ==== Notice ====
-echo This script do not support Windows XP.
+echo This script do not support Windows XP x86 {Build 2600}
 echo.
 echo Press any key to exit...
 pause >nul
@@ -34,61 +31,72 @@ echo Press any key to exit...
 pause >nul
 goto :eof
 )
+
+set "arch=x64"
+if /i "%PROCESSOR_ARCHITECTURE%"=="x86" if "%PROCESSOR_ARCHITEW6432%"=="" set "arch=x86"
+
 set "_Nul1=1>nul"
 set "_Nul2=2>nul"
 set "_Nul6=2^>nul"
 set "_Nul3=1>nul 2>nul"
 setlocal EnableDelayedExpansion
 
+set "mvc=Microsoft Visual C++"
 set "_natkey=hklm\software\microsoft\windows\currentversion\uninstall"
 set "_wowkey=hklm\software\wow6432node\microsoft\windows\currentversion\uninstall"
 
 if exist "!_temp!\msi*.txt" del /f /q "!_temp!\msi*.txt"
 
-if %arch% neq x64 goto :x64skip
+if %arch%==x86 goto :MsiNat
+
+:MsiWow
 for %%G in (
-"Microsoft Visual C++ 2005 Redistributable"
-"Microsoft Visual C++ 2008 Redistributable"
-"Microsoft Visual C++ 2010  x86 Redistributable"
-"Microsoft Visual C++ 2012 x86 Additional Runtime"
-"Microsoft Visual C++ 2012 x86 Minimum Runtime"
-"Microsoft Visual C++ 2013 x86 Additional Runtime"
-"Microsoft Visual C++ 2013 x86 Minimum Runtime"
-"Microsoft Visual C++ 2015 x86 Additional Runtime"
-"Microsoft Visual C++ 2015 x86 Minimum Runtime"
-"Microsoft Visual C++ 2017 x86 Additional Runtime"
-"Microsoft Visual C++ 2017 x86 Minimum Runtime"
-"Microsoft Visual C++ 2019 x86 Additional Runtime"
-"Microsoft Visual C++ 2019 x86 Minimum Runtime"
-"Microsoft Visual C++ 2022 x86 Additional Runtime"
-"Microsoft Visual C++ 2022 x86 Minimum Runtime"
+"%mvc% 2005 Redistributable"
+"%mvc% 2008 Redistributable"
+"%mvc% 2010  x86 Redistributable"
+"%mvc% 2012 x86 Additional Runtime"
+"%mvc% 2012 x86 Minimum Runtime"
+"%mvc% 2013 x86 Additional Runtime"
+"%mvc% 2013 x86 Minimum Runtime"
+"%mvc% 14 x86 Additional Runtime"
+"%mvc% 14 x86 Minimum Runtime"
+"%mvc% 2015 x86 Additional Runtime"
+"%mvc% 2015 x86 Minimum Runtime"
+"%mvc% 2017 x86 Additional Runtime"
+"%mvc% 2017 x86 Minimum Runtime"
+"%mvc% 2019 x86 Additional Runtime"
+"%mvc% 2019 x86 Minimum Runtime"
+"%mvc% 2022 x86 Additional Runtime"
+"%mvc% 2022 x86 Minimum Runtime"
 "Microsoft Visual Studio 2010 Tools for Office Runtime"
 "Microsoft Visual Basic/C++ Runtime"
 ) do (
 reg query %_wowkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi32.txt"
 )
 
-:x64skip
+:MsiNat
 for %%G in (
-"Microsoft Visual C++ 2005 Redistributable"
-"Microsoft Visual C++ 2008 Redistributable"
-"Microsoft Visual C++ 2010  %arch% Redistributable"
-"Microsoft Visual C++ 2012 %arch% Additional Runtime"
-"Microsoft Visual C++ 2012 %arch% Minimum Runtime"
-"Microsoft Visual C++ 2013 %arch% Additional Runtime"
-"Microsoft Visual C++ 2013 %arch% Minimum Runtime"
-"Microsoft Visual C++ 2015 %arch% Additional Runtime"
-"Microsoft Visual C++ 2015 %arch% Minimum Runtime"
-"Microsoft Visual C++ 2017 %arch% Additional Runtime"
-"Microsoft Visual C++ 2017 %arch% Minimum Runtime"
-"Microsoft Visual C++ 2019 %arch% Additional Runtime"
-"Microsoft Visual C++ 2019 %arch% Minimum Runtime"
-"Microsoft Visual C++ 2022 %arch% Additional Runtime"
-"Microsoft Visual C++ 2022 %arch% Minimum Runtime"
+"%mvc% 2005 Redistributable"
+"%mvc% 2008 Redistributable"
+"%mvc% 2010  %arch% Redistributable"
+"%mvc% 2012 %arch% Additional Runtime"
+"%mvc% 2012 %arch% Minimum Runtime"
+"%mvc% 2013 %arch% Additional Runtime"
+"%mvc% 2013 %arch% Minimum Runtime"
+"%mvc% 14 %arch% Additional Runtime"
+"%mvc% 14 %arch% Minimum Runtime"
+"%mvc% 2015 %arch% Additional Runtime"
+"%mvc% 2015 %arch% Minimum Runtime"
+"%mvc% 2017 %arch% Additional Runtime"
+"%mvc% 2017 %arch% Minimum Runtime"
+"%mvc% 2019 %arch% Additional Runtime"
+"%mvc% 2019 %arch% Minimum Runtime"
+"%mvc% 2022 %arch% Additional Runtime"
+"%mvc% 2022 %arch% Minimum Runtime"
 "Microsoft Visual Studio 2010 Tools for Office Runtime"
 "Microsoft Visual Basic/C++ Runtime"
 ) do (
-reg query %_natkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi.txt"
+reg query %_natkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi96.txt"
 )
 
 :menu
@@ -114,8 +122,8 @@ reg add %_wowkey%\%%G /f /v SystemComponent /t REG_DWORD /d 1 %_Nul3%
 )
 
 :hidemsi
-findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\msi.txt" %_Nul3% || goto :close
-for /f "usebackq tokens=7 delims=\" %%G in ("!_temp!\msi.txt") do (
+findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\msi96.txt" %_Nul3% || goto :close
+for /f "usebackq tokens=7 delims=\" %%G in ("!_temp!\msi96.txt") do (
 reg add %_natkey%\%%G /f /v SystemComponent /t REG_DWORD /d 1 %_Nul3%
 )
 goto :close
@@ -124,13 +132,13 @@ goto :close
 @cls
 findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\msi32.txt" %_Nul3% || goto :showmsi
 for /f "usebackq tokens=8 delims=\" %%G in ("!_temp!\msi32.txt") do (
-reg add %_wowkey%\%%G /f /v SystemComponent /t REG_DWORD /d 0 %_Nul3%
+reg delete %_wowkey%\%%G /f /v SystemComponent %_Nul3%
 )
 
 :showmsi
-findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\msi.txt" %_Nul3% || goto :close
-for /f "usebackq tokens=7 delims=\" %%G in ("!_temp!\msi.txt") do (
-reg add %_natkey%\%%G /f /v SystemComponent /t REG_DWORD /d 0 %_Nul3%
+findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\msi96.txt" %_Nul3% || goto :close
+for /f "usebackq tokens=7 delims=\" %%G in ("!_temp!\msi96.txt") do (
+reg delete %_natkey%\%%G /f /v SystemComponent %_Nul3%
 )
 goto :close
 
