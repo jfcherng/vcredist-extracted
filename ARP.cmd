@@ -6,8 +6,11 @@ set auto=1
 )
 
 set "SysPath=%SystemRoot%\System32"
-if exist "%SystemRoot%\Sysnative\reg.exe" (set "SysPath=%SystemRoot%\Sysnative")
-set "Path=%SysPath%;%SystemRoot%;%SysPath%\Wbem"
+set "Path=%SystemRoot%\System32;%SystemRoot%\System32\Wbem"
+if exist "%SystemRoot%\Sysnative\reg.exe" (
+set "SysPath=%SystemRoot%\Sysnative"
+set "Path=%SystemRoot%\Sysnative;%SystemRoot%\Sysnative\Wbem;%Path%"
+)
 set "_temp=%temp%"
 
 set _xp=0

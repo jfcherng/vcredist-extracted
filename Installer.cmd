@@ -1,7 +1,7 @@
 @setlocal DisableDelayedExpansion
 @echo off
 set _debug=0
-set vci=v0.68.0
+set vci=v0.69.0
 set auto=0
 set verbosity=/quiet
 set verbosityshort=/qn /norestart
@@ -43,8 +43,11 @@ set count=0
 set invalid=0
 
 set "SysPath=%SystemRoot%\System32"
-if exist "%SystemRoot%\Sysnative\reg.exe" (set "SysPath=%SystemRoot%\Sysnative")
-set "Path=%SysPath%;%SystemRoot%;%SysPath%\Wbem"
+set "Path=%SystemRoot%\System32;%SystemRoot%\System32\Wbem"
+if exist "%SystemRoot%\Sysnative\reg.exe" (
+set "SysPath=%SystemRoot%\Sysnative"
+set "Path=%SystemRoot%\Sysnative;%SystemRoot%\Sysnative\Wbem;%Path%"
+)
 set "_temp=%temp%"
 set "_work=%~dp0"
 set "_work=%_work:~0,-1%"
@@ -64,6 +67,20 @@ if %auto% equ 1 goto :eof
 echo ==== Notice ====
 echo VisualCppRedist_AIO v35 is the last version to support Windows XP
 echo VC++ 2019 v14.28.29213.0 is the last version compatible with Windows XP
+echo.
+if %_debug% equ 1 goto :eof
+echo Press any key to exit...
+pause >nul
+goto :eof
+)
+
+for /f "tokens=6 delims=[]. " %%G in ('ver') do set winbuild=%%G
+set _lh=0
+if %winbuild% lss 6100 (
+if %auto% equ 1 goto :eof
+echo ==== Notice ====
+echo VisualCppRedist_AIO v61 is the last version to support Windows Vista
+echo VC++ 2022 v14.32.31332.0 is the last version compatible with Windows Vista
 echo.
 if %_debug% equ 1 goto :eof
 echo Press any key to exit...
@@ -108,8 +125,6 @@ echo The window will be closed when finished
 if defined uc14 goto :ucrtonly
 title Visual C++ Redistributable AIO %vci%
 
-for /f "tokens=6 delims=[]. " %%G in ('ver') do set winbuild=%%G
-
 for /f "skip=2 tokens=3* delims= " %%G in ('"reg query "hklm\software\microsoft\Windows NT\currentversion" /v productname" %_Nul6%') do set "winv=%%G %%H"
 
 if %winbuild% geq 7601 for /f "tokens=3" %%G in ('"reg query "hklm\software\microsoft\Windows NT\currentversion" /v UBR" %_Nul6%') do if not errorlevel 1 set /a "UBR=%%G"
@@ -125,7 +140,7 @@ if %auto% equ 1 goto :proceed
 :top
 if %_debug% equ 1 goto :proceed
 set _inp=
-call :title
+if %_debug% equ 0 call :title
 echo Before installing the latest Visual C++ Runtimes
 echo any existing non-compliant versions will be removed.
 echo.
@@ -159,6 +174,8 @@ set "_ver14=36325020"
 
 set "_filevstor=%CommonProgramFiles%\Microsoft Shared\VSTO\vstoee.dll"
 
+set "_x86fusn08=x86_microsoft.vc80.crt_1fc8b3b9a1e18e3b_none_bcc8f3fc9457ed28\8.0\8.0.50727.6229\msvcp80.dll"
+set "_x86fusn09=x86_microsoft.vc90.crt_1fc8b3b9a1e18e3b_none_ea33c8f0b247cd77\9.0\9.0.30729.7523\msvcp90.dll"
 set "_x86file08=x86_microsoft.vc80.crt_1fc8b3b9a1e18e3b_8.0.50727.6229_none_d089f796442de10e\msvcp80.dll"
 set "_x86file09=x86_microsoft.vc90.crt_1fc8b3b9a1e18e3b_9.0.30729.7523_none_508f21ccbcbbb7a8\msvcp90.dll"
 set "_x86file10=msvcp100.dll"
@@ -166,6 +183,8 @@ set "_x86file11=msvcp110.dll"
 set "_x86file12=msvcp120.dll"
 set "_x86file14=msvcp140.dll"
 
+set "_x64fusn08=amd64_microsoft.vc80.crt_1fc8b3b9a1e18e3b_none_751bbd257fdbc422\8.0\8.0.50727.6229\msvcp80.dll"
+set "_x64fusn09=amd64_microsoft.vc90.crt_1fc8b3b9a1e18e3b_none_a28692199dcba471\9.0\9.0.30729.7523\msvcp90.dll"
 set "_x64file08=amd64_microsoft.vc80.crt_1fc8b3b9a1e18e3b_8.0.50727.6229_none_88dcc0bf2fb1b808\msvcp80.dll"
 set "_x64file09=amd64_microsoft.vc90.crt_1fc8b3b9a1e18e3b_9.0.30729.7523_none_08e1eaf5a83f8ea2\msvcp90.dll"
 set "_x64file10=msvcp100.dll"
@@ -209,7 +228,7 @@ reg query "HKLM\%RegKey%" /v Enabled %_Nul2% | find /i "0x0" %_Nul1% && (set vbs
 if %arch%==x86 goto :WiXNat
 
 :WiXWow
-call :title
+if %_debug% equ 0 call :title
 
 for %%G in (
 "%mvc% 2012 Redistributable"
@@ -249,7 +268,7 @@ for %%H in (%wixpkg%) do (
 )
 
 :MsiWow
-call :title
+if %_debug% equ 0 call :title
 
 if not defined updt for %%G in (08,09,10,11,12,14) do set _x86install%%G=1
 if defined updt for %%G in (08,09,10,11,12,14) do set _x86install%%G=2
@@ -277,7 +296,7 @@ if %%i equ %_ver14:~0,2% if %%j equ %_ver14:~2,5% if %%k geq %_ver14:~7,1% set _
 )
 for %%G in (08,09) do (
 if exist "%SystemRoot%\WinSxS\!_x86file%%G!" set _x86install%%G=0
-if exist "%SystemRoot%\WinSxS\Fusion\!_x86file%%G!" set _x86install%%G=0
+if exist "%SystemRoot%\WinSxS\Fusion\!_x86fusn%%G!" set _x86install%%G=0
 )
 for %%G in (08,09) do if !_x86install%%G! equ 0 (
 reg query %_wowkey%\!_x86code%%G! %_val% %_Nul3% || set _x86install%%G=1
@@ -329,13 +348,13 @@ echo ^(please wait as this process may take a few moments^)
 set invalid=1
 for /f "usebackq tokens=8 delims=\" %%G in ("!_temp!\msi.txt") do (
 if %_debug% equ 0 (
-  start /wait msiexec /X%%G %verbosity% /norestart
+  start /wait MsiExec.exe /X%%G %verbosity% /norestart
   reg delete %_wowkey%\%%G /f %_Nul3%
   )
 )
 
 :WiXNat
-call :title
+if %_debug% equ 0 call :title
 
 if exist "!_temp!\msi.txt" del /f /q "!_temp!\msi.txt"
 if exist "!_temp!\wix.txt" del /f /q "!_temp!\wix.txt"
@@ -379,7 +398,7 @@ for %%H in (vcredist_x86.exe,vc_redist.x86.exe) do (
 )
 
 :MsiNat
-call :title
+if %_debug% equ 0 call :title
 
 if %arch%==arm64 (
 for %%G in (08,09,10,11,12,14,vstor) do set _%arch%install%%G=0
@@ -415,7 +434,7 @@ if %%i equ %_ver14:~0,2% if %%j equ %_ver14:~2,5% if %%k geq %_ver14:~7,1% set _
 )
 for %%G in (08,09) do (
 if exist "%SystemRoot%\WinSxS\!_%arch%file%%G!" set _%arch%install%%G=0
-if exist "%SystemRoot%\WinSxS\Fusion\!_%arch%file%%G!" set _%arch%install%%G=0
+if exist "%SystemRoot%\WinSxS\Fusion\!_%arch%fusn%%G!" set _%arch%install%%G=0
 )
 for %%G in (08,09) do if !_%arch%install%%G! equ 0 (
 reg query %_natkey%\!_%arch%code%%G! %_val% %_Nul3% || set _%arch%install%%G=1
@@ -467,7 +486,7 @@ echo ^(please wait as this process may take a few moments^)
 set invalid=1
 for /f "usebackq tokens=7 delims=\" %%G in ("!_temp!\msi.txt") do (
 if %_debug% equ 0 (
-  start /wait msiexec /X%%G %verbosity% /norestart
+  start /wait MsiExec.exe /X%%G %verbosity% /norestart
   reg delete %_natkey%\%%G /f %_Nul3%
   )
 )
@@ -494,6 +513,7 @@ set "_x64msi14a=2022\x64\vc_runtimeAdditional_x64.msi"
 set "_x86vstor=vstor\vstor40_x86.msi"
 set "_x64vstor=vstor\vstor40_x64.msi"
 set "_vbcrun=vbc\vbcrun.msi"
+set "_vcrun=vbc\vcrun.msi"
 
 for %%G in (08,09,10) do if !_%arch%install%%G! equ 1 set /a installcount+=1
 for %%G in (11,12,14) do if !_%arch%install%%G! equ 1 set /a installcount+=2
@@ -527,14 +547,6 @@ call :install "!_x86msi%%Ga!"
 )
 
 :vbc
-if defined vcpp (
-if %installcount% equ 0 if %invalid% equ 0 (call :title&echo All installed Visual C++ Redistributables are compliant.)
-goto :close
-)
-if defined updt (
-if %installcount% equ 0 if %invalid% equ 0 (call :title&echo Installed Visual C++ Redistributables are compliant.)
-goto :close
-)
 if %arch%==x86 (
 set "dest=%SystemRoot%\system32"
 set "_qkey=%_natkey%"
@@ -542,8 +554,23 @@ set "_qkey=%_natkey%"
 set "dest=%SystemRoot%\syswow64"
 set "_qkey=%_wowkey%"
 )
-if not exist "%dest%\vb40032.dll" goto :vbcinstall
+if defined vcpp if exist "%dest%\msvcrt10.dll" (
+if %installcount% equ 0 if %invalid% equ 0 (call :title&echo All installed Visual C++ Redistributables are compliant.)
+goto :close
+)
+if defined updt (
+if %installcount% equ 0 if %invalid% equ 0 (call :title&echo Installed Visual C++ Redistributables are compliant.)
+goto :close
+)
 reg query %_qkey%\{C5E3A69D-D391-45A6-A8FB-00B01E2B010D} %_val% %_Nul3% && goto :ucrtbase
+reg query %_qkey%\{C5E3A69D-D392-45A6-A8FB-00B01E2B010D} %_val% %_Nul3% && (
+reg query %_qkey%\{C5E3A69D-D393-45A6-A8FB-00B01E2B010D} %_val% %_Nul3% && goto :ucrtbase
+)
+if defined vcpp (
+reg query %_qkey%\{C5E3A69D-D392-45A6-A8FB-00B01E2B010D} %_val% %_Nul3% && goto :ucrtbase
+goto :vcinstall
+)
+if not exist "%dest%\vb40032.dll" goto :vbcinstall
 for %%G in (
 comct232.ocx  msbind.dll    msdbrptr.dll  msstdfmt.dll
 comct332.ocx  mscdrun.dll   msflxgrd.ocx  msstkprp.dll
@@ -587,13 +614,27 @@ del /f /q %SystemRoot%\System\vbrun*.dll %_Nul3%
 )
 
 :vbcinstall
-call :title
+if %_debug% equ 0 call :title
 set /a count+=1
 set /a installcount+=1
 echo Installing %count% of %installcount%: %_vbcrun%
 echo.
 echo.
-if %_debug% equ 0 %_vbcrun% %verbosityshort%
+if %_debug% equ 0 (
+start /wait MsiExec.exe /X{C5E3A69D-D392-45A6-A8FB-00B01E2B010D} %verbosity% /norestart
+start /wait MsiExec.exe /X{C5E3A69D-D393-45A6-A8FB-00B01E2B010D} %verbosity% /norestart
+%_vbcrun% %verbosityshort%
+)
+goto :ucrtbase
+
+:vcinstall
+if %_debug% equ 0 call :title
+set /a count+=1
+set /a installcount+=1
+echo Installing %count% of %installcount%: %_vcrun%
+echo.
+echo.
+if %_debug% equ 0 %_vcrun% %verbosityshort%
 
 :ucrtbase
 if %installcount% equ 0 if %invalid% equ 0 (call :title&echo All installed Visual C++ Redistributables are compliant.)
@@ -602,9 +643,6 @@ if defined ucrt goto :close
 if exist "%SysPath%\ucrtbase.dll" goto :close
 if %_debug% equ 1 goto :close
 set "dest=%SystemRoot%\servicing\Packages"
-if exist "%dest%\Package_for_KB948465*6.0.1.18005.mum" (
-start /w PkgMgr.exe /ip /m:"%cd%\ucrt\6002-%arch%.mum" /quiet /norestart %_Nul3%
-)
 if exist "%dest%\Microsoft-Windows-*6.1.7601.17514.mum" (
 dism.exe /Online /Quiet /NoRestart /Add-Package /PackagePath:ucrt\7601-%arch%.mum %_Nul3%
 )
@@ -632,7 +670,7 @@ if defined vbslm reg add "HKLM\%RegKey%" /v Enabled /t REG_DWORD /d 0 /f %_Nul3%
 
 if %auto% equ 1 goto :eof
 if %installcount% neq 0 (
-call :title
+if %_debug% equ 0 call :title
 echo Installer has completed. 
 )
 echo.
@@ -643,7 +681,7 @@ pause >nul
 goto :eof
 
 :install
-call :title
+if %_debug% equ 0 call :title
 set /a count+=1
 echo Installing %count% of %installcount%: %~1
 echo.
