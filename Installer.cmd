@@ -1,7 +1,7 @@
 @setlocal DisableDelayedExpansion
 @echo off
 set _debug=0
-set vci=v0.69.0
+set vci=v0.70.0
 set auto=0
 set verbosity=/quiet
 set verbosityshort=/qn /norestart
@@ -170,7 +170,7 @@ set "_ver09=307297523"
 set "_ver10=40219473"
 set "_ver11=61135400"
 set "_ver12=406640"
-set "_ver14=36325020"
+set "_ver14=36325220"
 
 set "_filevstor=%CommonProgramFiles%\Microsoft Shared\VSTO\vstoee.dll"
 
@@ -200,8 +200,8 @@ set "_x86code11m={BD95A8CD-1D9F-35AD-981A-3E7925026EBB}"
 set "_x86code11a={B175520C-86A2-35A7-8619-86DC379688B9}"
 set "_x86code12m={8122DAB1-ED4D-3676-BB0A-CA368196543E}"
 set "_x86code12a={D401961D-3A20-3AC7-943B-6139D5BD490A}"
-set "_x86code14m={76BFF371-768C-4E26-80DF-A8CD7EA45189}"
-set "_x86code14a={7A56B6A5-E2A6-434B-BB7D-DB0D1A337300}"
+set "_x86code14m={EC544F11-8C90-45DA-8DFE-B8991E4E9A13}"
+set "_x86code14a={8D48A3BC-BA38-402F-96E3-E35189E5485D}"
 
 set "_x64code08={ad8a2fa1-06e7-4b0d-927d-6e54b3d31028}"
 set "_x64code09={5FCE6D76-F5DC-37AB-B2B8-22AB8CEDB1D4}"
@@ -211,8 +211,8 @@ set "_x64code11m={CF2BEA3C-26EA-32F8-AA9B-331F7E34BA97}"
 set "_x64code11a={37B8F9C7-03FB-3253-8781-2517C99D7C00}"
 set "_x64code12m={53CF6934-A98D-3D84-9146-FC4EDF3D5641}"
 set "_x64code12a={010792BA-551A-3AC0-A7EF-0FAB4156C382}"
-set "_x64code14m={B0FC0878-C711-4732-9C27-D6D2033009FF}"
-set "_x64code14a={234186C6-A88D-4593-A88E-A70CFA7BAE67}"
+set "_x64code14m={2BC69CC6-EFB9-4000-B131-F3C337578E40}"
+set "_x64code14a={19E65C98-8F11-49AD-AA55-97356FA6108A}"
 
 if exist "!_temp!\msi.txt" del /f /q "!_temp!\msi.txt"
 if exist "!_temp!\wix.txt" del /f /q "!_temp!\wix.txt"
