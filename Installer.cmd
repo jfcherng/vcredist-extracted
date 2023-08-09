@@ -1,7 +1,7 @@
 @setlocal DisableDelayedExpansion
 @echo off
 set _debug=0
-set vci=v0.74.0
+set vci=v0.75.0
 set auto=0
 set verbosity=/quiet
 set verbosityshort=/qn /norestart
@@ -164,7 +164,7 @@ set "_val=/v UninstallString"
 set "_natkey=hklm\software\microsoft\windows\currentversion\uninstall"
 set "_wowkey=hklm\software\wow6432node\microsoft\windows\currentversion\uninstall"
 
-set "_vstor=608280"
+set "_vstor=609100"
 set "_ver08=507276229"
 set "_ver09=307297523"
 set "_ver10=40219473"
