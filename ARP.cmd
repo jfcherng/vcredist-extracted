@@ -21,7 +21,7 @@ set _xp=1
 echo ==== Notice ====
 echo This script do not support Windows XP x86 {Build 2600}
 echo.
-echo Press any key to exit...
+echo Press any key to exit.
 pause >nul
 goto :eof
 )
@@ -30,7 +30,7 @@ echo ==== ERROR ====
 echo This script require administrator privileges.
 echo To do so, right click on this script and select 'Run as administrator'
 echo.
-echo Press any key to exit...
+echo Press any key to exit.
 pause >nul
 goto :eof
 )
@@ -73,8 +73,10 @@ for %%G in (
 "%mvc% 2022 x86 Minimum Runtime"
 "Microsoft Visual Studio 2010 Tools for Office Runtime"
 "Microsoft Visual Basic/C++ Runtime"
+"Microsoft Visual Basic Runtime"
+"Microsoft Visual C++ 2002-2003 Runtime"
 ) do (
-reg query %_wowkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi32.txt"
+reg query %_wowkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" >>"!_temp!\msi32.txt"
 )
 
 :MsiNat
@@ -98,8 +100,10 @@ for %%G in (
 "%mvc% 2022 %arch% Minimum Runtime"
 "Microsoft Visual Studio 2010 Tools for Office Runtime"
 "Microsoft Visual Basic/C++ Runtime"
+"Microsoft Visual Basic Runtime"
+"Microsoft Visual C++ 2002-2003 Runtime"
 ) do (
-reg query %_natkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi96.txt"
+reg query %_natkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" >>"!_temp!\msi96.txt"
 )
 
 :menu
@@ -154,6 +158,6 @@ if exist "!_temp!\msi*.txt" del /f /q "!_temp!\msi*.txt"
 if %auto% equ 1 goto :eof
 echo ==== Done ====
 echo.
-echo Press any key to exit...
+echo Press any key to exit.
 pause >nul
 goto :eof

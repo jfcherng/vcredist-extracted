@@ -1,7 +1,7 @@
 @setlocal DisableDelayedExpansion
 @echo off
 set _debug=0
-set vci=v0.75.0
+set vci=v0.76.0
 set auto=0
 set verbosity=/quiet
 set verbosityshort=/qn /norestart
@@ -51,7 +51,8 @@ set "Path=%SystemRoot%\Sysnative;%SystemRoot%\Sysnative\Wbem;%Path%"
 set "_temp=%temp%"
 set "_work=%~dp0"
 set "_work=%_work:~0,-1%"
-for /f "tokens=2*" %%a in ('reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop') do call set "_log=%%b\VCpp"
+for /f "skip=2 tokens=2*" %%a in ('reg.exe query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop') do call set "_log=%%b\VCpp"
+:: if exist "%PUBLIC%\Desktop\desktop.ini" set "_log=%PUBLIC%\Desktop\VCpp"
 
 set "arch=x64"&set "xBT=amd64"
 if /i "%PROCESSOR_ARCHITECTURE%"=="x86" if "%PROCESSOR_ARCHITEW6432%"=="" set "arch=x86"&set "xBT=x86"
@@ -69,7 +70,7 @@ echo VisualCppRedist_AIO v35 is the last version to support Windows XP
 echo VC++ 2019 v14.28.29213.0 is the last version compatible with Windows XP
 echo.
 if %_debug% equ 1 goto :eof
-echo Press any key to exit...
+echo Press any key to exit.
 pause >nul
 goto :eof
 )
@@ -83,7 +84,7 @@ echo VisualCppRedist_AIO v61 is the last version to support Windows Vista
 echo VC++ 2022 v14.32.31332.0 is the last version compatible with Windows Vista
 echo.
 if %_debug% equ 1 goto :eof
-echo Press any key to exit...
+echo Press any key to exit.
 pause >nul
 goto :eof
 )
@@ -93,7 +94,7 @@ echo ==== ERROR ====
 echo This script require administrator privileges.
 echo To do so, right click on this script and select 'Run as administrator'
 echo.
-echo Press any key to exit...
+echo Press any key to exit.
 pause >nul
 goto :eof
 )
@@ -170,7 +171,7 @@ set "_ver09=307297523"
 set "_ver10=40219473"
 set "_ver11=61135400"
 set "_ver12=406640"
-set "_ver14=38329190"
+set "_ver14=38331261"
 
 set "_filevstor=%CommonProgramFiles%\Microsoft Shared\VSTO\vstoee.dll"
 
@@ -200,8 +201,8 @@ set "_x86code11m={BD95A8CD-1D9F-35AD-981A-3E7925026EBB}"
 set "_x86code11a={B175520C-86A2-35A7-8619-86DC379688B9}"
 set "_x86code12m={8122DAB1-ED4D-3676-BB0A-CA368196543E}"
 set "_x86code12a={D401961D-3A20-3AC7-943B-6139D5BD490A}"
-set "_x86code14m={2F7F071D-83D0-4994-8237-7B0579452FD4}"
-set "_x86code14a={5F0295FE-3DAA-4C04-94A6-2AFC6D739D34}"
+set "_x86code14m={387A6108-C9DB-4A91-B628-98A61230FC8A}"
+set "_x86code14a={F76AEA78-E9C4-4524-8A95-880DB727F51D}"
 
 set "_x64code08={ad8a2fa1-06e7-4b0d-927d-6e54b3d31028}"
 set "_x64code09={5FCE6D76-F5DC-37AB-B2B8-22AB8CEDB1D4}"
@@ -211,8 +212,8 @@ set "_x64code11m={CF2BEA3C-26EA-32F8-AA9B-331F7E34BA97}"
 set "_x64code11a={37B8F9C7-03FB-3253-8781-2517C99D7C00}"
 set "_x64code12m={53CF6934-A98D-3D84-9146-FC4EDF3D5641}"
 set "_x64code12a={010792BA-551A-3AC0-A7EF-0FAB4156C382}"
-set "_x64code14m={D028B71C-9372-40C9-B535-5841F78448CC}"
-set "_x64code14a={98B96874-2649-4CC3-B599-1F2EEC28A500}"
+set "_x64code14m={14DDB43F-B11B-47D7-B118-F8EC25D52606}"
+set "_x64code14a={F80D0C4E-7BA7-4B7B-9B81-CECFB5601EE8}"
 
 if exist "!_temp!\msi.txt" del /f /q "!_temp!\msi.txt"
 if exist "!_temp!\wix.txt" del /f /q "!_temp!\wix.txt"
@@ -247,7 +248,7 @@ for %%G in (
 "%mvc% 2015-2019 Redistributable"
 "%mvc% 2015-2022 Redistributable"
 ) do (
-reg query %_wowkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\wix.txt"
+reg query %_wowkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" >>"!_temp!\wix.txt"
 )
 
 findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\wix.txt" %_Nul3% || goto :MsiWow
@@ -310,14 +311,14 @@ reg query %_wowkey%\!_x86code%%Gm! %_val% %_Nul3% || set _x86install%%G=1
 reg query %_wowkey%\!_x86code%%Ga! %_val% %_Nul3% || set _x86install%%G=1
 )
 
-reg query %_wowkey% /f "%mvc% 2005 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v %_x86code08% >>"!_temp!\msi.txt"
-if %_x86install08% equ 1 reg query %_wowkey% /f "%mvc% 2005 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi.txt"
+reg query %_wowkey% /f "%mvc% 2005 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" | findstr /i /v %_x86code08% >>"!_temp!\msi.txt"
+if %_x86install08% equ 1 reg query %_wowkey% /f "%mvc% 2005 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" >>"!_temp!\msi.txt"
 
-reg query %_wowkey% /f "%mvc% 2008 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v %_x86code09% >>"!_temp!\msi.txt"
-if %_x86install09% equ 1 reg query %_wowkey% /f "%mvc% 2008 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi.txt"
+reg query %_wowkey% /f "%mvc% 2008 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" | findstr /i /v %_x86code09% >>"!_temp!\msi.txt"
+if %_x86install09% equ 1 reg query %_wowkey% /f "%mvc% 2008 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" >>"!_temp!\msi.txt"
 
-reg query %_wowkey% /f "%mvc% 2010  x86 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v %_x86code10% >>"!_temp!\msi.txt"
-if %_x86install10% equ 1 reg query %_wowkey% /f "%mvc% 2010  x86 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi.txt"
+reg query %_wowkey% /f "%mvc% 2010  x86 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" | findstr /i /v %_x86code10% >>"!_temp!\msi.txt"
+if %_x86install10% equ 1 reg query %_wowkey% /f "%mvc% 2010  x86 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" >>"!_temp!\msi.txt"
 
 reg query %_wowkey% /f "%mvc% 2012 x86 Additional Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v %_x86code11a% >>"!_temp!\msi.txt"
 reg query %_wowkey% /f "%mvc% 2012 x86 Minimum Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v %_x86code11m% >>"!_temp!\msi.txt"
@@ -378,7 +379,7 @@ for %%G in (
 "%mvc% 2015-2019 Redistributable"
 "%mvc% 2015-2022 Redistributable"
 ) do (
-reg query %_natkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\wix.txt"
+reg query %_natkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" >>"!_temp!\wix.txt"
 )
 findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\wix.txt" %_Nul3% || goto :MsiNat
 
@@ -409,7 +410,10 @@ if not defined updt for %%G in (08,09,10,11,12,14,vstor) do set _%arch%install%%
 if defined updt for %%G in (08,09,10,11,12,14,vstor) do set _%arch%install%%G=2
 
 if exist "%_filevstor%" if defined updt set _%arch%installvstor=1
-if exist "%_filevstor%" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%_filevstor%"') do if %%i%%j geq %_vstor% set _%arch%installvstor=0
+if exist "%_filevstor%" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%_filevstor%"') do (
+if %%i gtr %_vstor:~0,5% set _%arch%installvstor=0
+if %%i equ %_vstor:~0,5% if %%j geq %_vstor:~5,1% set _%arch%installvstor=0
+)
 
 if exist "%SysPath%\!_%arch%file10!" if defined updt set _%arch%install10=1
 if exist "%SysPath%\!_%arch%file10!" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\System32\!_%arch%file10!"') do (
@@ -448,14 +452,14 @@ reg query %_natkey%\!_%arch%code%%Gm! %_val% %_Nul3% || set _%arch%install%%G=1
 reg query %_natkey%\!_%arch%code%%Ga! %_val% %_Nul3% || set _%arch%install%%G=1
 )
 
-reg query %_natkey% /f "%mvc% 2005 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v !_%arch%code08! >>"!_temp!\msi.txt"
-if !_%arch%install08! equ 1 reg query %_natkey% /f "%mvc% 2005 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi.txt"
+reg query %_natkey% /f "%mvc% 2005 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" | findstr /i /v !_%arch%code08! >>"!_temp!\msi.txt"
+if !_%arch%install08! equ 1 reg query %_natkey% /f "%mvc% 2005 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" >>"!_temp!\msi.txt"
 
-reg query %_natkey% /f "%mvc% 2008 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v !_%arch%code09! >>"!_temp!\msi.txt"
-if !_%arch%install09! equ 1 reg query %_natkey% /f "%mvc% 2008 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi.txt"
+reg query %_natkey% /f "%mvc% 2008 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" | findstr /i /v !_%arch%code09! >>"!_temp!\msi.txt"
+if !_%arch%install09! equ 1 reg query %_natkey% /f "%mvc% 2008 Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" >>"!_temp!\msi.txt"
 
-reg query %_natkey% /f "%mvc% 2010  %arch% Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v !_%arch%code10! >>"!_temp!\msi.txt"
-if !_%arch%install10! equ 1 reg query %_natkey% /f "%mvc% 2010  %arch% Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi.txt"
+reg query %_natkey% /f "%mvc% 2010  %arch% Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" | findstr /i /v !_%arch%code10! >>"!_temp!\msi.txt"
+if !_%arch%install10! equ 1 reg query %_natkey% /f "%mvc% 2010  %arch% Redistributable" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" >>"!_temp!\msi.txt"
 
 reg query %_natkey% /f "%mvc% 2012 %arch% Additional Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v !_%arch%code11a! >>"!_temp!\msi.txt"
 reg query %_natkey% /f "%mvc% 2012 %arch% Minimum Runtime" /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /i /v !_%arch%code11m! >>"!_temp!\msi.txt"
@@ -676,7 +680,7 @@ echo Installer has completed.
 echo.
 echo.
 echo.
-echo Press any key to exit...
+echo Press any key to exit.
 pause >nul
 goto :eof
 

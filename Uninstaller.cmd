@@ -23,7 +23,7 @@ set _xp=1
 echo ==== Notice ====
 echo This script do not support Windows XP x86 {Build 2600}
 echo.
-echo Press any key to exit...
+echo Press any key to exit.
 pause >nul
 goto :eof
 )
@@ -32,7 +32,7 @@ echo ==== ERROR ====
 echo This script require administrator privileges.
 echo To do so, right click on this script and select 'Run as administrator'
 echo.
-echo Press any key to exit...
+echo Press any key to exit.
 pause >nul
 goto :eof
 )
@@ -103,7 +103,7 @@ for %%G in (
 "%mvc% 2015-2019 Redistributable"
 "%mvc% 2015-2022 Redistributable"
 ) do (
-reg query %_wowkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\wix.txt"
+reg query %_wowkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" >>"!_temp!\wix.txt"
 )
 
 findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\wix.txt" %_Nul3% || goto :MsiWow
@@ -141,8 +141,10 @@ for %%G in (
 "%mvc% 2022 x86 Minimum Runtime"
 "Microsoft Visual Studio 2010 Tools for Office Runtime"
 "Microsoft Visual Basic/C++ Runtime"
+"Microsoft Visual Basic Runtime"
+"Microsoft Visual C++ 2002-2003 Runtime"
 ) do (
-reg query %_wowkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi.txt"
+reg query %_wowkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" >>"!_temp!\msi.txt"
 )
 
 findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\msi.txt" %_Nul3% || goto :WiXNat
@@ -151,7 +153,7 @@ echo.
 echo Uninstalling Visual C++ MSI packages {x86}
 
 for /f "usebackq tokens=8 delims=\" %%G in ("!_temp!\msi.txt") do (
-start /wait msiexec /X%%G %verbosity% /norestart
+start /wait MsiExec.exe /X%%G %verbosity% /norestart
 reg delete %_wowkey%\%%G /f %_Nul3%
 )
 
@@ -178,7 +180,7 @@ for %%G in (
 "%mvc% 2015-2019 Redistributable"
 "%mvc% 2015-2022 Redistributable"
 ) do (
-reg query %_natkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\wix.txt"
+reg query %_natkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" >>"!_temp!\wix.txt"
 )
 findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\wix.txt" %_Nul3% || goto :MsiNat
 
@@ -215,8 +217,10 @@ for %%G in (
 "%mvc% 2022 %arch% Minimum Runtime"
 "Microsoft Visual Studio 2010 Tools for Office Runtime"
 "Microsoft Visual Basic/C++ Runtime"
+"Microsoft Visual Basic Runtime"
+"Microsoft Visual C++ 2002-2003 Runtime"
 ) do (
-reg query %_natkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" >>"!_temp!\msi.txt"
+reg query %_natkey% /f %%G /s %_Nul2% | find /i "HKEY_LOCAL_MACHINE" | findstr /r "{.*-.*-.*-.*-.*}" >>"!_temp!\msi.txt"
 )
 
 findstr /i "HKEY_LOCAL_MACHINE" "!_temp!\msi.txt" %_Nul3% || goto :vbc
@@ -225,7 +229,7 @@ echo.
 echo Uninstalling Visual C++ MSI packages {%arch%}
 
 for /f "usebackq tokens=7 delims=\" %%G in ("!_temp!\msi.txt") do (
-start /wait msiexec /X%%G %verbosity% /norestart
+start /wait MsiExec.exe /X%%G %verbosity% /norestart
 reg delete %_natkey%\%%G /f %_Nul3%
 )
 
@@ -237,7 +241,9 @@ reg add HKLM\SYSTEM\CurrentControlSet\Services\EventLog\Application\VBRuntime /v
 reg add HKLM\SYSTEM\CurrentControlSet\Services\EventLog\Application\VBRuntime /v TypesSupported /t REG_DWORD /d 4 /f %_Nul3%
 reg import vbc\extra-fix-%arch%.reg %_Nul3%
 )
-start /wait msiexec /X{C5E3A69D-D391-45A6-A8FB-00B01E2B010D} %verbosity% /norestart
+start /wait MsiExec.exe /X{C5E3A69D-D391-45A6-A8FB-00B01E2B010D} %verbosity% /norestart
+start /wait MsiExec.exe /X{C5E3A69D-D392-45A6-A8FB-00B01E2B010D} %verbosity% /norestart
+start /wait MsiExec.exe /X{C5E3A69D-D393-45A6-A8FB-00B01E2B010D} %verbosity% /norestart
 for %%G in (
 comct232.ocx  msbind.dll    msdbrptr.dll  msstdfmt.dll
 comct332.ocx  mscdrun.dll   msflxgrd.ocx  msstkprp.dll
@@ -288,6 +294,6 @@ echo.
 echo.
 echo Finished.
 echo.
-echo Press any key to exit...
+echo Press any key to exit.
 pause >nul
 goto :eof
