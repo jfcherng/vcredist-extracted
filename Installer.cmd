@@ -1,7 +1,7 @@
 @setlocal DisableDelayedExpansion
 @echo off
 set _debug=0
-set vci=v0.77.0
+set vci=v0.78.0
 set auto=0
 set verbosity=/quiet
 set verbosityshort=/qn /norestart
@@ -43,10 +43,10 @@ set count=0
 set invalid=0
 
 set "SysPath=%SystemRoot%\System32"
-set "Path=%SystemRoot%\System32;%SystemRoot%\System32\Wbem"
+set "Path=%SystemRoot%\System32;%SystemRoot%\System32\Wbem;%SystemRoot%\System32\WindowsPowerShell\v1.0\"
 if exist "%SystemRoot%\Sysnative\reg.exe" (
 set "SysPath=%SystemRoot%\Sysnative"
-set "Path=%SystemRoot%\Sysnative;%SystemRoot%\Sysnative\Wbem;%Path%"
+set "Path=%SystemRoot%\Sysnative;%SystemRoot%\Sysnative\Wbem;%SystemRoot%\Sysnative\WindowsPowerShell\v1.0\;%Path%"
 )
 set "_temp=%temp%"
 set "_work=%~dp0"
@@ -75,6 +75,7 @@ pause >nul
 goto :eof
 )
 
+set winbuild=1
 for /f "tokens=6 delims=[]. " %%G in ('ver') do set winbuild=%%G
 set _lh=0
 if %winbuild% lss 6100 (
@@ -123,6 +124,17 @@ echo The window will be closed when finished
 @exit /b
 
 :Begin
+set _cwmi=0
+for %%# in (wmic.exe) do if not "%%~$PATH:#"=="" (
+wmic path Win32_ComputerSystem get CreationClassName /value 2>nul | find /i "ComputerSystem" 1>nul && set _cwmi=1
+)
+set _pwsh=1
+for %%# in (powershell.exe) do if "%%~$PATH:#"=="" set _pwsh=0
+if not exist "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" set _pwsh=0
+set _vbse=1
+for %%# in (cscript.exe) do if "%%~$PATH:#"=="" set _vbse=0
+if not exist "%SysPath%\vbscript.dll" set _vbse=0
+
 if defined uc14 goto :ucrtonly
 title Visual C++ Redistributable AIO %vci%
 
@@ -165,15 +177,16 @@ set "_val=/v UninstallString"
 set "_natkey=hklm\software\microsoft\windows\currentversion\uninstall"
 set "_wowkey=hklm\software\wow6432node\microsoft\windows\currentversion\uninstall"
 
-set "_vstor=609100"
-set "_ver08=507276229"
-set "_ver09=307297523"
-set "_ver10=40219473"
-set "_ver11=61135400"
-set "_ver12=406640"
-set "_ver14=38331300"
+set "_vervt=0.60912.0"
+set "_ver08=0.50727.6229"
+set "_ver09=0.30729.7523"
+set "_ver10=0.40219.473"
+set "_ver11=0.61135.400"
+set "_ver12=0.40664.0"
+set "_ver14=38.33135.0"
 
-set "_filevstor=%CommonProgramFiles%\Microsoft Shared\VSTO\vstoee.dll"
+set "_filevt=%CommonProgramFiles%\Microsoft Shared\VSTO\vstoee.dll"
+if defined CommonProgramW6432 set "_filevt=%CommonProgramW6432%\Microsoft Shared\VSTO\vstoee.dll"
 
 set "_x86fusn08=x86_microsoft.vc80.crt_1fc8b3b9a1e18e3b_none_bcc8f3fc9457ed28\8.0\8.0.50727.6229\msvcp80.dll"
 set "_x86fusn09=x86_microsoft.vc90.crt_1fc8b3b9a1e18e3b_none_ea33c8f0b247cd77\9.0\9.0.30729.7523\msvcp90.dll"
@@ -201,8 +214,8 @@ set "_x86code11m={BD95A8CD-1D9F-35AD-981A-3E7925026EBB}"
 set "_x86code11a={B175520C-86A2-35A7-8619-86DC379688B9}"
 set "_x86code12m={8122DAB1-ED4D-3676-BB0A-CA368196543E}"
 set "_x86code12a={D401961D-3A20-3AC7-943B-6139D5BD490A}"
-set "_x86code14m={DF1B52DF-C88E-4DDF-956B-6E7A03327F46}"
-set "_x86code14a={5CA9AE7B-2EFC-4F02-81CD-32ABE173C755}"
+set "_x86code14m={286DC39B-5FB7-4AFF-9DD4-22DB47664CD7}"
+set "_x86code14a={9C19C103-7DB1-44D1-A039-2C076A633A38}"
 
 set "_x64code08={ad8a2fa1-06e7-4b0d-927d-6e54b3d31028}"
 set "_x64code09={5FCE6D76-F5DC-37AB-B2B8-22AB8CEDB1D4}"
@@ -212,8 +225,8 @@ set "_x64code11m={CF2BEA3C-26EA-32F8-AA9B-331F7E34BA97}"
 set "_x64code11a={37B8F9C7-03FB-3253-8781-2517C99D7C00}"
 set "_x64code12m={53CF6934-A98D-3D84-9146-FC4EDF3D5641}"
 set "_x64code12a={010792BA-551A-3AC0-A7EF-0FAB4156C382}"
-set "_x64code14m={1CA7421F-A225-4A9C-B320-A36981A2B789}"
-set "_x64code14a={C31777DB-51C1-4B19-9F80-38EF5C1D7C89}"
+set "_x64code14m={AA0C8AB5-7297-4D46-A0D9-08096FE59E46}"
+set "_x64code14a={19AFE054-CA83-45D5-A9DB-4108EF4BD391}"
 
 if exist "!_temp!\msi.txt" del /f /q "!_temp!\msi.txt"
 if exist "!_temp!\wix.txt" del /f /q "!_temp!\wix.txt"
@@ -222,9 +235,11 @@ if exist filever.vbs del /f /q filever.vbs
 echo>>filever.vbs Set objFSO = CreateObject^("Scripting.FileSystemObject"^)
 echo>>filever.vbs Wscript.Echo objFSO.GetFileVersion^(WScript.arguments^(0^)^)
 
-set "RegKey=SOFTWARE\Microsoft\Windows Script Host\Settings"
-reg query "HKCU\%RegKey%" /v Enabled %_Nul2% | find /i "0x0" %_Nul1% && (set vbscu=1&reg delete "HKCU\%RegKey%" /v Enabled /f %_Nul3%)
-reg query "HKLM\%RegKey%" /v Enabled %_Nul2% | find /i "0x0" %_Nul1% && (set vbslm=1&reg delete "HKLM\%RegKey%" /v Enabled /f %_Nul3%)
+set "_WSH=SOFTWARE\Microsoft\Windows Script Host\Settings"
+if %_vbse% equ 1 (
+reg query "HKCU\%_WSH%" /v Enabled %_Nul2% | find /i "0x0" %_Nul1% && (set vbscu=1&reg delete "HKCU\%_WSH%" /v Enabled /f %_Nul3%)
+reg query "HKLM\%_WSH%" /v Enabled %_Nul2% | find /i "0x0" %_Nul1% && (set vbslm=1&reg delete "HKLM\%_WSH%" /v Enabled /f %_Nul3%)
+)
 
 if %arch%==x86 goto :WiXNat
 
@@ -274,26 +289,8 @@ if %_debug% equ 0 call :title
 if not defined updt for %%G in (08,09,10,11,12,14) do set _x86install%%G=1
 if defined updt for %%G in (08,09,10,11,12,14) do set _x86install%%G=2
 
-if exist "%SystemRoot%\SysWOW64\!_x86file10!" if defined updt set _x86install10=1
-if exist "%SystemRoot%\SysWOW64\!_x86file10!" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\SysWOW64\!_x86file10!"') do (
-if %%i gtr %_ver10:~0,5% set _x86install10=0
-if %%i equ %_ver10:~0,5% if %%j geq %_ver10:~5,3% set _x86install10=0
-)
-if exist "%SystemRoot%\SysWOW64\!_x86file11!" if defined updt set _x86install11=1
-if exist "%SystemRoot%\SysWOW64\!_x86file11!" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\SysWOW64\!_x86file11!"') do (
-if %%i gtr %_ver11:~0,5% set _x86install11=0
-if %%i equ %_ver11:~0,5% if %%j geq %_ver11:~5,3% set _x86install11=0
-)
-if exist "%SystemRoot%\SysWOW64\!_x86file12!" if defined updt set _x86install12=1
-if exist "%SystemRoot%\SysWOW64\!_x86file12!" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\SysWOW64\!_x86file12!"') do (
-if %%i gtr %_ver12:~0,5% set _x86install12=0
-if %%i equ %_ver12:~0,5% if %%j geq %_ver12:~5,1% set _x86install12=0
-)
-if exist "%SystemRoot%\SysWOW64\!_x86file14!" if defined updt set _x86install14=1
-if exist "%SystemRoot%\SysWOW64\!_x86file14!" for /f "tokens=2-4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\SysWOW64\!_x86file14!"') do (
-if %%i gtr %_ver14:~0,2% set _x86install14=0
-if %%i equ %_ver14:~0,2% if %%j gtr %_ver14:~2,5% set _x86install14=0
-if %%i equ %_ver14:~0,2% if %%j equ %_ver14:~2,5% if %%k geq %_ver14:~7,1% set _x86install14=0
+for %%G in (10,11,12,14) do if exist "%SystemRoot%\SysWOW64\!_x86file%%G!" (
+call :fVer "%SystemRoot%\SysWOW64\!_x86file%%G!" _x86install%%G !_ver%%G!
 )
 for %%G in (08,09) do (
 if exist "%SystemRoot%\WinSxS\!_x86file%%G!" set _x86install%%G=0
@@ -402,39 +399,18 @@ for %%H in (vcredist_x86.exe,vc_redist.x86.exe) do (
 if %_debug% equ 0 call :title
 
 if %arch%==arm64 (
-for %%G in (08,09,10,11,12,14,vstor) do set _%arch%install%%G=0
+for %%G in (08,09,10,11,12,14,vt) do set _%arch%install%%G=0
 goto :process
 )
 
-if not defined updt for %%G in (08,09,10,11,12,14,vstor) do set _%arch%install%%G=1
-if defined updt for %%G in (08,09,10,11,12,14,vstor) do set _%arch%install%%G=2
+if not defined updt for %%G in (08,09,10,11,12,14,vt) do set _%arch%install%%G=1
+if defined updt for %%G in (08,09,10,11,12,14,vt) do set _%arch%install%%G=2
 
-if exist "%_filevstor%" if defined updt set _%arch%installvstor=1
-if exist "%_filevstor%" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%_filevstor%"') do (
-if %%i gtr %_vstor:~0,5% set _%arch%installvstor=0
-if %%i equ %_vstor:~0,5% if %%j geq %_vstor:~5,1% set _%arch%installvstor=0
+if exist "%_filevt%" (
+call :fVer "%_filevt%" _%arch%installvt !_vervt!
 )
-
-if exist "%SysPath%\!_%arch%file10!" if defined updt set _%arch%install10=1
-if exist "%SysPath%\!_%arch%file10!" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\System32\!_%arch%file10!"') do (
-if %%i gtr %_ver10:~0,5% set _%arch%install10=0
-if %%i equ %_ver10:~0,5% if %%j geq %_ver10:~5,3% set _%arch%install10=0
-)
-if exist "%SysPath%\!_%arch%file11!" if defined updt set _%arch%install11=1
-if exist "%SysPath%\!_%arch%file11!" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\System32\!_%arch%file11!"') do (
-if %%i gtr %_ver11:~0,5% set _%arch%install11=0
-if %%i equ %_ver11:~0,5% if %%j geq %_ver11:~5,3% set _%arch%install11=0
-)
-if exist "%SysPath%\!_%arch%file12!" if defined updt set _%arch%install12=1
-if exist "%SysPath%\!_%arch%file12!" for /f "tokens=3,4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\System32\!_%arch%file12!"') do (
-if %%i gtr %_ver12:~0,5% set _%arch%install12=0
-if %%i equ %_ver12:~0,5% if %%j geq %_ver12:~5,1% set _%arch%install12=0
-)
-if exist "%SysPath%\!_%arch%file14!" if defined updt set _%arch%install14=1
-if exist "%SysPath%\!_%arch%file14!" for /f "tokens=2-4 delims=." %%i in ('cscript //nologo filever.vbs "%SystemRoot%\System32\!_%arch%file14!"') do (
-if %%i gtr %_ver14:~0,2% set _%arch%install14=0
-if %%i equ %_ver14:~0,2% if %%j gtr %_ver14:~2,5% set _%arch%install14=0
-if %%i equ %_ver14:~0,2% if %%j equ %_ver14:~2,5% if %%k geq %_ver14:~7,1% set _%arch%install14=0
+for %%G in (10,11,12,14) do if exist "%SysPath%\!_%arch%file%%G!" (
+call :fVer "%SystemRoot%\System32\!_%arch%file%%G!" _%arch%install%%G !_ver%%G!
 )
 for %%G in (08,09) do (
 if exist "%SystemRoot%\WinSxS\!_%arch%file%%G!" set _%arch%install%%G=0
@@ -496,6 +472,8 @@ if %_debug% equ 0 (
 )
 
 :process
+set "_x86msivt=vstor\vstor40_x86.msi"
+set "_x64msivt=vstor\vstor40_x64.msi"
 set "_x86msi08=2005\x86\vcredist.msi"
 set "_x64msi08=2005\x64\vcredist.msi"
 set "_x86msi09=2008\x86\vc_red.msi"
@@ -514,8 +492,6 @@ set "_x86msi14m=2022\x86\vc_runtimeMinimum_x86.msi"
 set "_x86msi14a=2022\x86\vc_runtimeAdditional_x86.msi"
 set "_x64msi14m=2022\x64\vc_runtimeMinimum_x64.msi"
 set "_x64msi14a=2022\x64\vc_runtimeAdditional_x64.msi"
-set "_x86vstor=vstor\vstor40_x86.msi"
-set "_x64vstor=vstor\vstor40_x64.msi"
 set "_vbcrun=vbc\vbcrun.msi"
 set "_vcrun=vbc\vcrun.msi"
 
@@ -525,7 +501,7 @@ if not %arch%==x86 (
 for %%G in (08,09,10) do if !_x86install%%G! equ 1 set /a installcount+=1
 for %%G in (11,12,14) do if !_x86install%%G! equ 1 set /a installcount+=2
 )
-if not defined vcpp if !_%arch%installvstor! equ 1 set /a installcount+=1
+if not defined vcpp if !_%arch%installvt! equ 1 set /a installcount+=1
 
 if %installcount% equ 0 goto :vbc
 
@@ -536,8 +512,8 @@ for %%G in (11,12,14) do if !_%arch%install%%G! equ 1 (
 call :install "!_%arch%msi%%Gm!"
 call :install "!_%arch%msi%%Ga!"
 )
-if not defined vcpp if !_%arch%installvstor! equ 1 (
-call :install "!_%arch%vstor!"
+if not defined vcpp if !_%arch%installvt! equ 1 (
+call :install "!_%arch%msivt!"
 )
 
 if %arch%==x86 goto :vbc
@@ -669,8 +645,8 @@ msi.txt wix.txt
 if exist "!_temp!\%%~nxG" del /f /q "!_temp!\%%~nxG"
 )
 if exist filever.vbs del /f /q filever.vbs
-if defined vbscu reg add "HKCU\%RegKey%" /v Enabled /t REG_DWORD /d 0 /f %_Nul3%
-if defined vbslm reg add "HKLM\%RegKey%" /v Enabled /t REG_DWORD /d 0 /f %_Nul3%
+if defined vbscu reg add "HKCU\%_WSH%" /v Enabled /t REG_DWORD /d 0 /f %_Nul3%
+if defined vbslm reg add "HKLM\%_WSH%" /v Enabled /t REG_DWORD /d 0 /f %_Nul3%
 
 if %auto% equ 1 goto :eof
 if %installcount% neq 0 (
@@ -682,6 +658,31 @@ echo.
 echo.
 echo Press any key to exit.
 pause >nul
+goto :eof
+
+:fVer
+if %_debug% equ 1 cmd.exe /c "dir %1 | find /i "%~n1""
+set "_fvr=%~1"
+set "cfvr=!_fvr:\=\\!"
+if %_vbse% equ 1 (
+set _chk=cscript.exe //nologo filever.vbs "%_fvr%"
+) else if %_pwsh% equ 1 (
+set _chk=powershell -nop -c "(gi '%_fvr%').VersionInfo.FileVersion"
+) else if %_cwmi% equ 1 (
+set "_chk="wmic datafile where name='!cfvr!' get Version /value ^| findstr ^=""
+) else (
+goto :eof
+)
+if defined updt set %2=1
+set min=0&set bld=0&set rev=0
+for /f "tokens=2-4 delims=. " %%i in ('%_chk%') do (
+set min=%%i&set bld=%%j&set rev=%%k
+)
+for /f "tokens=1-3 delims=." %%i in ('echo %3') do (
+if %min% gtr %%i set %2=0
+if %min% equ %%i if %bld% gtr %%j set %2=0
+if %min% equ %%i if %bld% equ %%j if %rev% geq %%k set %2=0
+)
 goto :eof
 
 :install
