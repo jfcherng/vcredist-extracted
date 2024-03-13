@@ -1,7 +1,7 @@
 @setlocal DisableDelayedExpansion
 @echo off
 set _debug=0
-set vci=v0.78.0
+set vci=v0.79.0
 set auto=0
 set verbosity=/quiet
 set verbosityshort=/qn /norestart
@@ -183,7 +183,7 @@ set "_ver09=0.30729.7523"
 set "_ver10=0.40219.473"
 set "_ver11=0.61135.400"
 set "_ver12=0.40664.0"
-set "_ver14=38.33135.0"
+set "_ver14=40.33617.1"
 
 set "_filevt=%CommonProgramFiles%\Microsoft Shared\VSTO\vstoee.dll"
 if defined CommonProgramW6432 set "_filevt=%CommonProgramW6432%\Microsoft Shared\VSTO\vstoee.dll"
