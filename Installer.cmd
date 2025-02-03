@@ -1,7 +1,7 @@
 @setlocal DisableDelayedExpansion
 @echo off
 set _debug=0
-set vci=v0.84.0
+set vci=v0.86.0
 set verbosity=/quiet
 set verbshort=/qn /norestart
 set auto=0
@@ -170,7 +170,7 @@ set "_ver09=0.30729.7523"
 set "_ver10=0.40219.473"
 set "_ver11=0.61135.400"
 set "_ver12=0.40664.0"
-set "_ver14=42.34430.0"
+set "_ver14=42.34438.0"
 
 set "_x86codevtc=2201E8883DC9CA23EBB666F86FBA1A63"
 set "_x86code09c=6E815EB96CCE9A53884E7857C57002F0"
@@ -183,8 +183,8 @@ set "_x86code11m={BD95A8CD-1D9F-35AD-981A-3E7925026EBB}"
 set "_x86code11a={B175520C-86A2-35A7-8619-86DC379688B9}"
 set "_x86code12m={8122DAB1-ED4D-3676-BB0A-CA368196543E}"
 set "_x86code12a={D401961D-3A20-3AC7-943B-6139D5BD490A}"
-set "_x86code14m={24DC1755-F1A7-4551-BAAD-62C7A5D6AE48}"
-set "_x86code14a={7D69C1B0-90C2-44F1-AC44-2F6D33C4E355}"
+set "_x86code14m={5D0C4511-3CA1-4FF8-A4BA-C0E1957ABEEA}"
+set "_x86code14a={A5592FEF-F948-4BA6-A066-8BBFC2DC7EE1}"
 
 set "_x64codevtc=9D7840160643A823393312D9347AC55C"
 set "_x64code09c=67D6ECF5CD5FBA732B8B22BAC8DE1B4D"
@@ -197,8 +197,8 @@ set "_x64code11m={CF2BEA3C-26EA-32F8-AA9B-331F7E34BA97}"
 set "_x64code11a={37B8F9C7-03FB-3253-8781-2517C99D7C00}"
 set "_x64code12m={53CF6934-A98D-3D84-9146-FC4EDF3D5641}"
 set "_x64code12a={010792BA-551A-3AC0-A7EF-0FAB4156C382}"
-set "_x64code14m={DDC4F09E-E09A-4A0A-BCEA-1273F46BB017}"
-set "_x64code14a={A3B53E0C-2E33-4AF9-AED6-EB748F98BCED}"
+set "_x64code14m={2E15F519-4FDA-4834-B4EE-7EFCE7D8D4EE}"
+set "_x64code14a={E528AD94-12D7-42C4-91A3-908BE28E9BD2}"
 
 set "_pathvt=%CommonProgramFiles%\Microsoft Shared\VSTO"
 if defined CommonProgramW6432 set "_pathvt=%CommonProgramW6432%\Microsoft Shared\VSTO"
@@ -250,6 +250,10 @@ call :chWiX wow
 
 findstr /i %_h_% "!_temp!\wix.txt" %_Nul3% || goto :MsiWow
 
+for %%G in (11,12,14) do if !_x86install%%G! equ 0 (
+call :reMSI wow %%G
+)
+
 call :unWiX wow
 
 :MsiWow
@@ -281,6 +285,10 @@ if not %arch%==x86 goto :MsiNat
 call :chWiX nat
 
 findstr /i %_h_% "!_temp!\wix.txt" %_Nul3% || goto :MsiNat
+
+for %%G in (11,12,14) do if !_x86install%%G! equ 0 (
+call :reMSI nat %%G
+)
 
 call :unWiX nat
 
@@ -518,6 +526,35 @@ echo.
 echo.
 goto :E_Exit
 
+:reMSI
+if "%1"=="nat" (
+set _k_=%_natkey%
+) else (
+set _k_=%_wowkey%
+)
+
+if "%2"=="11" for %%G in (
+"%mvc% 2012 %_r_%"
+) do (
+reg query %_k_% /f %%G /s %_Nul2% | find /i %_h_% | findstr /r %_g_% %_Nul1% && (set _x86install%2=1)
+)
+if "%2"=="12" for %%G in (
+"%mvc% 2013 %_r_%"
+) do (
+reg query %_k_% /f %%G /s %_Nul2% | find /i %_h_% | findstr /r %_g_% %_Nul1% && (set _x86install%2=1)
+)
+if "%2"=="14" for %%G in (
+"%mvc% 2015 %_r_%"
+"%mvc% 2017 %_r_%"
+"%mvc% 2019 %_r_%"
+"%mvc% 2015-2019 %_r_%"
+"%mvc% 2015-2022 %_r_%"
+) do (
+reg query %_k_% /f %%G /s %_Nul2% | find /i %_h_% | findstr /r %_g_% %_Nul1% && (set _x86install%2=1)
+)
+
+goto :eof
+
 :chWiX
 if "%1"=="nat" (
 set _k_=%_natkey%
@@ -740,6 +777,7 @@ goto :eof
 echo ==== ERROR ====
 echo This script require administrator privileges.
 echo To do so, right click on this script and select 'Run as administrator'
+if %auto% equ 1 goto :eof
 goto :E_Exit
 
 :unsupported

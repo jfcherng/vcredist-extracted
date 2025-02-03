@@ -111,6 +111,7 @@ goto :E_Exit
 echo ==== ERROR ====
 echo This script require administrator privileges.
 echo To do so, right click on this script and select 'Run as administrator'
+if %auto% equ 1 goto :eof
 goto :E_Exit
 
 :unsupported
